@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registro de Usuário</title>
+    <style>
+        /* Define a cor de fundo e o estilo básico da página */
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f9;
+            padding: 20px;
+            max-width: 600px;
+            margin: 0 auto;
+            color: #333;
+        }
+
+        /* Título da página de registro */
+        h2 {
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: 28px;
+            color: #4CAF50;
+        }
+
+        /* Estilo do formulário */
+        form {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            background-color: #fff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Estilo dos campos de entrada e do botão */
+        input[type="text"],
+        input[type="email"],
+        input[type="password"],
+        select {
+            padding: 10px;
+            font-size: 16px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        select {
+            cursor: pointer;
+        }
+
+        /* Estilo para os labels */
+        label {
+            font-size: 16px;
+            font-weight: bold;
+            color: #555;
+        }
+
+        /* Estilo do botão */
+        button {
+            padding: 12px;
+            font-size: 16px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+
+        /* Link para a página de login */
+        p {
+            text-align: center;
+            font-size: 14px;
+        }
+
+        a {
+            color: #4CAF50;
+            text-decoration: none;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        /* Adiciona um espaçamento abaixo de cada item do formulário */
+        div {
+            margin-bottom: 15px;
+        }
+    </style>
+</head>
+
+<body>
+    <h2>Cadastro de Usuário</h2>
+    <form action="/register" method="POST">
+        <div>
+            <label for="username">Nome de usuário:</label>
+            <input type="text" id="username" name="username" required>
+        </div>
+
+        <div>
+            <label for="email">E-mail:</label>
+            <input type="email" id="email" name="email" required>
+        </div>
+
+        <div>
+            <label for="perfil">Escolha sua foto de perfil:</label>
+            <select id="perfil" name="perfil" required>
+                <option value="https://i.pinimg.com/736x/b8/7f/3f/b87f3fa4d2581a1196ff71b9cb95caae.jpg">Goku</option>
+                <option value="https://cdn.pfps.gg/pfps/6072-vegeta-1.png">Vegeta</option>
+                <option value="https://pbs.twimg.com/media/F0287jOXgAARdC8.jpg">Sonic</option>
+                <option value="https://img.ibxk.com.br/2024/09/04/04195132338037.jpg?ims=328x">Amy Rose</option>
+                <option value="https://i.pinimg.com/originals/14/37/4f/14374f6454e77e82c48051a3bb61dd9c.jpg">Shadow</option>
+                <option value="https://wallpapers-clan.com/wp-content/uploads/2022/12/naruto-sakura-pfp-15.jpg">Sakura</option>
+                <option value="https://avatarfiles.alphacoders.com/328/thumb-1920-328567.jpg">Broly</option>
+            </select>
+        </div>
+
+        <div>
+            <label for="password">Senha:</label>
+            <input type="password" id="password" name="password" required>
+        </div>
+
+        <div>
+            <button type="submit">Registrar</button>
+        </div>
+    </form>
+
+    <p>Já tem uma conta? <a href="/login">Faça login aqui</a></p>
+</body>
+
+</html>

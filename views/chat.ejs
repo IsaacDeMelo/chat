@@ -13,70 +13,66 @@
             align-items: center;
             flex-direction: column;
             height: 90vh;
-            overflow: hidden; 
+            overflow: hidden;
         }
 
         ul {
             list-style: none;
             padding: 0px;
             width: 100%;
-            border-top: 1px solid black; 
-            padding: 20px; 
+            border-top: 1px solid black;
+            padding: 20px;
 
         }
 
         ul li {
             padding: 10px;
             margin: 10px 0px 10px 0px;
-            border: 1px solid black; 
+            border: 1px solid black;
         }
 
         .perfil {
             border-radius: 50%;
         }
-        .content{
-            border: 1px solid black; 
+
+        .content {
+            border: 1px solid black;
             border-radius: 10px;
             padding: 5px 20px 20px 10px;
-            width: 100%; 
+            width: 100%;
         }
     </style>
+    <script src="/socket.io/socket.io.js"></script>
     <script>
-        // Função para buscar mensagens via AJAX
-        async function fetchMessages() {
-            try {
-                const response = await fetch('/api/messages');
-                const messages = await response.json();
+        const socket = io(); // Conecta ao servidor WebSocket
 
-                // Atualiza a lista de mensagens no HTML
-                const messagesList = document.getElementById('messages');
-                messagesList.innerHTML = ''; // Limpa mensagens antigas
-                messages.forEach(msg => {
-                    const li = document.createElement('li');
-                    li.innerHTML = `
-                        <div class="message" style="display: flex; flex-direction: row;">       
-                            <div style="display: flex; padding-top: 0px;">
+        // Escuta por atualizações de mensagens
+        socket.on('updateMessages', (messages) => {
+            const messagesList = document.getElementById('messages');
+            messagesList.innerHTML = ''; // Limpa mensagens antigas
+            messages.forEach((msg) => {
+                const li = document.createElement('li');
+                li.innerHTML = `
+                    <div class="message" style="display: flex; flex-direction: row;">       
+                        <div style="display: flex; padding-top: 0px;">
                             <div class="perfil" style=" border: 1px solid black; width: 35px; height: 35px; background-image: url(${msg.foto}); background-size: cover; background-position: center; margin-right: 10px;">
                             </div>
-                            </div>
-                            <div class="content" >
-                                <strong>${msg.usuario}</strong>
-                                <p>${msg.texto}</p>
-                                <code style="font-size: 10px;">${msg.created}</code>
-                            </div>
-                            </div>`;
-                    messagesList.appendChild(li);
-                });
-            } catch (error) {
-                console.error('Erro ao buscar mensagens:', error);
-            }
-        }
+                        </div>
+                        <div class="content">
+                            <strong>${msg.usuario}</strong>
+                            <p>${msg.texto}</p>
+                            <code style="font-size: 10px;">${msg.created}</code>
+                        </div>
+                    </div>`;
+                messagesList.appendChild(li);
+            });
+        });
 
-        // Função para enviar mensagem
+        // Enviar mensagem
         async function sendMessage(event) {
-            event.preventDefault(); // Evita recarregar a página
+            event.preventDefault();
             const input = document.getElementById('messageInput');
-            const usuario = "<%= user.username %>"; // Insira o nome do usuário renderizado pelo servidor
+            const usuario = "<%= user.username %>";
             const texto = input.value.trim();
 
             if (!texto) {
@@ -94,8 +90,16 @@
                 });
 
                 if (response.ok) {
-                    input.value = ''; // Limpa o campo de input
-                    fetchMessages(); // Atualiza a lista de mensagens
+                    input.value = ''; // Limpa o campo
+
+                    // Aguarda um pequeno delay para garantir que a mensagem foi adicionada ao DOM
+                    setTimeout(() => {
+                        const messagesList = document.getElementById('messages');
+                        const lastMessage = messagesList.lastElementChild; // Seleciona a última mensagem
+                        if (lastMessage) {
+                            lastMessage.scrollIntoView({ behavior: 'smooth' }); // Rola até a última mensagem
+                        }
+                    }, 500);
                 } else {
                     console.error('Erro ao enviar mensagem');
                 }
@@ -103,18 +107,13 @@
                 console.error('Erro ao enviar mensagem:', error);
             }
         }
-
-        // Atualiza as mensagens a cada 500ms
-        setInterval(fetchMessages, 500);
-
-        // Inicializa as mensagens ao carregar a página
-        window.onload = fetchMessages;
     </script>
+
 </head>
 
 <body>
     <h1>Bem-vindo ao Chat</h1>
-    <div style="width: 100%; height: 90%; overflow-y: scroll;" >
+    <div style="width: 100%; height: 90%; overflow-y: scroll;">
         <ul id="messages">
             <!-- As mensagens serão carregadas aqui dinamicamente -->
         </ul>

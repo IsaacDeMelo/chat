@@ -10,31 +10,39 @@ const { Server } = require('socket.io');
 let CurrentUser = 0;
 
 dotenv.config();
+const { v2: cloudinary } = require('cloudinary');
+const { CloudinaryStorage } = require('multer-storage-cloudinary');
+const multer = require('multer');
 
+cloudinary.config({
+    cloud_name: "duf0jgp5g", // Adicione no .env
+    api_key: 565451444635366,       // Adicione no .env
+    api_secret: "0aQZwIXBXwe2hKZImALQDKevbVw", // Adicione no .env
+});
+
+const storage = new CloudinaryStorage({
+    cloudinary,
+    params: {
+        folder: 'profiles', // Nome da pasta no Cloudinary
+        allowed_formats: ['jpg', 'png', 'jpeg'], // Formatos permitidos
+    },
+});
+
+const upload = multer({ storage });
 const app = express();
-app.set('view engine', 'ejs');
-app.use(express.urlencoded({ extended: true }));
-app.use(express.json());
 const PORT = process.env.PORT || 3000;
 const server = http.createServer(app); // Cria o servidor HTTP
 const io = new Server(server); // Adiciona o WebSocket ao servidor
+
 // Conexão WebSocket
-io.on('connection', async (socket) => {
+io.on('connection', (socket) => {
     console.log('Novo cliente conectado');
 
-    try {
-        // Envia mensagens já existentes ao cliente
-        const messages = await Message.find();
-        socket.emit('updateMessages', messages);
-    } catch (err) {
-        console.error('Erro ao buscar mensagens ao conectar:', err);
-    }
-
+    // Escuta por desconexões
     socket.on('disconnect', () => {
         console.log('Cliente desconectado');
     });
 });
-
 
 const notifyClients = () => {
     Message.find()
@@ -43,28 +51,6 @@ const notifyClients = () => {
         })
         .catch((err) => console.error('Erro ao buscar mensagens:', err));
 };
-
-app.post('/api/messages', async (req, res) => {
-    const { usuario, texto } = req.body;
-    const username = usuario;
-    const user = await User.findOne({ username });
-    const foto = user.perfil;
-    const created = moment()
-        .tz('America/Sao_Paulo')
-        .format('DD [de] MMMM [de] YYYY, HH:mm:ss');
-
-    try {
-        const newMessage = new Message({ usuario, texto, foto, created });
-        await newMessage.save();
-
-        notifyClients(); // Atualiza os clientes
-        res.status(201).json(newMessage);
-    } catch (err) {
-        console.error('Erro ao salvar mensagem:', err.message);
-        res.status(500).json({ error: 'Erro ao salvar mensagem' });
-    }
-});
-
 
 app.set('view engine', 'ejs');
 app.use(express.urlencoded({ extended: true })); // Para processar dados de formulários
@@ -92,8 +78,8 @@ app.get('/login', (req, res) => {
     res.render('login');
 });
 
-app.post('/register', async (req, res) => {
-    const { username, email, perfil, password } = req.body;
+app.post('/register', upload.single('perfil'), async (req, res) => {
+    const { username, email, password } = req.body;
 
     try {
         // Verifica se o usuário já existe
@@ -102,17 +88,19 @@ app.post('/register', async (req, res) => {
             return res.status(400).send('Este e-mail já está registrado.');
         }
 
+        // Obtenha a URL da imagem enviada
+        const perfilUrl = req.file.path;
+    
         // Cria um novo usuário
         const newUser = new User({
             username,
             email,
-            perfil, // A URL da foto de perfil
+            perfil: perfilUrl, // Salva a URL no banco de dados
             password,
         });
 
-        // Salva o novo usuário no banco de dados
         await newUser.save();
-        res.redirect('/login'); // Redireciona para a página de login após o registro bem-sucedido
+        res.redirect('/login');
     } catch (err) {
         console.error('Erro ao registrar usuário:', err.message);
         res.status(500).send('Erro ao registrar usuário');
@@ -136,6 +124,7 @@ app.post('/login', async (req, res) => {
             return res.status(400).send('Senha incorreta');
         }
         CurrentUser = user;
+        console.log(user);
         res.render('chat', {user: user});
     } catch (err) {
         console.log(err);
@@ -145,23 +134,17 @@ app.post('/login', async (req, res) => {
 });
 
 app.post('/api/messages', async (req, res) => {
-    const { usuario, texto } = req.body; // Recebe o nome do usuário e o texto da mensagem no corpo da requisição
-    const username = usuario;
-    const user = await User.findOne({ username })
-    const foto = user.perfil;
-    // Define o horário de criação no fuso de Brasília
-    const created = moment()
-        .tz('America/Sao_Paulo')
-        .format('DD [de] MMMM [de] YYYY, HH:mm:ss'); // Formata com dia, mês, ano e horário
+    const { usuario, texto } = req.body;
+    const user = await User.findOne({ username: usuario });
+    const foto = user?.perfil;
+    const created = moment().tz('America/Sao_Paulo').format('hh:mm A');
 
     try {
         const newMessage = new Message({ usuario, texto, foto, created });
-        console.log(created)
         await newMessage.save();
-
-        console.log(CurrentUser.username);
-        console.log(`Texto da mensagem: ${texto}`);
-        res.status(201).json(newMessage); // Retorna a nova mensagem
+        console.log('Mensagem salva:', newMessage);
+        notifyClients(); // Notifica os clientes
+        res.status(201).json(newMessage);
     } catch (err) {
         console.error('Erro ao salvar mensagem:', err.message);
         res.status(500).json({ error: 'Erro ao salvar mensagem' });
@@ -171,6 +154,7 @@ app.post('/api/messages', async (req, res) => {
 app.get('/api/messages', async (req, res) => {
     try {
         const messages = await Message.find();
+        console.log(messages);
         res.json(messages);
     } catch (err) {
         res.status(500).json({ error: 'Erro ao buscar mensagens' });

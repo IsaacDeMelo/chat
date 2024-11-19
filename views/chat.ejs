@@ -377,7 +377,7 @@
                 if (response.ok) {
                     input.value = ''; // Limpa o campo de texto
                     imageInput.value = ''; // Limpa o campo de imagem (se houver)
-
+                    messageButton.disabled = false;
                     // Aguarda a atualização da interface após a mensagem ser enviada
                     setTimeout(() => {
                         const messagesList = document.getElementById('messages');
@@ -385,7 +385,6 @@
                         if (lastMessage) {
                             lastMessage.scrollIntoView({ behavior: 'smooth' });
                             document.getElementById('messageInput').style.height = "50px";
-                            messageButton.disabled = false;
                         }
                     }, 200);
                 } else {

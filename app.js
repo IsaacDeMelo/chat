@@ -170,14 +170,6 @@ app.post('/api/messages', upload.single('image'), async (req, res) => {
     }
 
     try {
-        // Verifica a última mensagem do usuário no banco de dados
-        const lastMessage = await Message.findOne({ usuario }).sort({ createdAt: -1 });
-
-        // Verifica se a mensagem enviada é idêntica à última mensagem
-        if (lastMessage && lastMessage.texto === texto) {
-            return res.status(400).json({ error: 'Você não pode enviar a mesma mensagem duas vezes seguidas.' });
-        }
-
         // Cria e salva a nova mensagem
         const newMessage = new Message({
             usuario,

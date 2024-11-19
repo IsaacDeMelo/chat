@@ -352,6 +352,7 @@
             const texto = input.value.trim();
             const imageInput = document.getElementById('imageInput');  // Referência ao input de imagem
 
+
             if (!texto && imageInput.files.length === 0) {
                 alert('Digite uma mensagem ou selecione uma imagem!');
                 return;
@@ -368,6 +369,8 @@
             }
 
             try {
+                input.value = ''; // Limpa o campo de texto
+                imageInput.value = ''; // Limpa o campo de imagem (se houver)
                 const response = await fetch('/api/messages', {
                     method: 'POST',
                     body: formData, // Envia o FormData

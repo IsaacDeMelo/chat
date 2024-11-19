@@ -7,13 +7,35 @@
     <title>Registro de Usuário</title>
     <style>
         /* Estilo geral */
+        html {
+            display: flex;
+            align-items: center;
+            flex-direction: column;
+            height: 100%;
+            overflow-x: hidden;
+        }
+
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(to bottom, #e8f5e9, #ffffff);
-            padding: 20px;
-            max-width: 600px;
+            background: linear-gradient(to bottom, rgb(15, 15, 15), rgb(10, 10, 10));
+            padding-top: 20px;
+
             margin: 0 auto;
             color: #333;
+            background: url('https://i.pinimg.com/736x/58/c3/33/58c33377dfcbb3022493dec49d098b02.jpg');
+            background-attachment: fixed;
+            background-size: cover;
+            background-position: center;
+            overflow-x: hidden;
+        }
+
+        @media (min-width: 500px) {
+            body {
+                width: 100%;
+                background: url('https://i.pinimg.com/736x/58/c3/33/58c33377dfcbb3022493dec49d098b02.jpg');
+                background-size: 300px;
+                background-position: top;
+            }
         }
 
         /* Título */
@@ -21,8 +43,9 @@
             text-align: center;
             margin-bottom: 20px;
             font-size: 28px;
-            color: #007bff;
+            color: rgb(30, 150, 48);
             text-transform: uppercase;
+            margin-top: 20px;
         }
 
         /* Formulário */
@@ -30,29 +53,32 @@
             display: flex;
             flex-direction: column;
             gap: 5px;
-            background-color: #fff;
-            padding: 30px;
+            background-color: rgb(34, 34, 34);
+            padding: 10px;
             border-radius: 12px;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            margin: 20px;
         }
 
         /* Campos de entrada */
         input[type="text"],
-        input[type="email"],
+        input[type="number"],
         input[type="password"] {
+            background-color: rgb(43, 43, 43);
             padding: 12px;
             font-size: 16px;
-            border: 1px solid #ccc;
+            border: none;
             border-radius: 8px;
             width: 100%;
             box-sizing: border-box;
             transition: border-color 0.3s;
+            color: rgb(233, 233, 233);
         }
 
         input[type="text"]:focus,
-        input[type="email"]:focus,
+        input[type="number"]:focus,
         input[type="password"]:focus {
-            border-color: #007bff;
+            border-color: rgb(30, 150, 48);
             outline: none;
         }
 
@@ -69,7 +95,7 @@
         button {
             padding: 12px;
             font-size: 18px;
-            background-color: #007bff;
+            background-color: rgb(30, 150, 48);
             color: white;
             border: none;
             border-radius: 8px;
@@ -78,7 +104,7 @@
         }
 
         button:hover {
-            background-color: #007bff;
+            background-color: rgb(30, 150, 48);
             transform: scale(1.05);
         }
 
@@ -93,9 +119,9 @@
             justify-content: center;
             padding: 12px;
             font-size: 16px;
-            color: #007bff;
-            background-color: #f9f9f9;
-            border: 2px dashed #007bff;
+            color: rgb(30, 150, 48);
+            background-color: rgb(24, 24, 24);
+            border: 2px dashed rgb(21, 120, 48);
             border-radius: 8px;
             cursor: pointer;
             transition: background-color 0.3s, border-color 0.3s;
@@ -104,7 +130,7 @@
 
         .custom-file-upload:hover {
             background-color: #e8f5e9;
-            border-color: #007bff;
+            border-color: rgb(30, 150, 48);
         }
 
         .custom-file-upload span {
@@ -126,8 +152,7 @@
         /* Exibição da imagem selecionada */
         .preview-image {
             margin-top: 10px;
-            max-width: 100px;
-            max-height: 100px;
+
             object-fit: cover;
             border-radius: 8px;
         }
@@ -140,7 +165,7 @@
         }
 
         a {
-            color: #007bff;
+            color: rgb(30, 150, 48);
             text-decoration: none;
             font-weight: bold;
         }
@@ -168,50 +193,61 @@
                 font-size: 16px;
             }
         }
+
+        @media (min-width: 480px) {
+            body {
+                background: none;
+                background-color: rgb(15, 15, 15);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+
+            form {
+                max-width: 50%;
+                padding: 20px;
+            }
+        }
     </style>
 </head>
 
 <body>
-    <h2>Cadastro de Usuário</h2>
     <form action="/register" enctype="multipart/form-data" method="POST">
+        <h2>Cadastro de Usuário</h2>
         <div>
             <label for="username">Nome de usuário:</label>
             <input type="text" id="username" name="username" placeholder="Digite seu nome de usuário" required>
         </div>
-
-        <div>
-            <label for="email">E-mail:</label>
-            <input type="email" id="email" name="email" placeholder="Digite seu e-mail" required>
-        </div>
-
         <div>
             <label for="perfil">Imagem de perfil:</label>
             <label for="upload" class="custom-file-upload">
-                <svg style="color: #007bff;" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="#007bff" viewBox="0 0 24 24">
-                    <path d="M12 16c2.209 0 4-1.791 4-4s-1.791-4-4-4-4 1.791-4 4 1.791 4 4 4zm-10 6v-3.075c.015-1.732 1.391-3.117 3.123-3.125h.031c1.73.008 3.104 1.393 3.119 3.125v3.075h10v-4.482l-2.598-2.598-2.111 2.112-4.085-4.085-5.206 5.206v4.847h-2.173zm14.001-6.394c2.746-2.018 3.157-4.676 2.526-7.015-.84-3.134-3.396-5.591-6.53-6.431-1.657-.445-3.397-.328-5.024.341-3.445 1.451-5.573 4.9-5.062 8.631.594 4.276 4.389 7.348 8.678 6.935 1.491-.145 2.901-.682 4.27-1.636z" />
+                <svg style="color: rgb(30, 150, 48);" xmlns="http://www.w3.org/2000/svg" width="24" height="24"
+                    fill="#1e9630" viewBox="0 0 24 24">
+                    <path
+                        d="M12 16c2.209 0 4-1.791 4-4s-1.791-4-4-4-4 1.791-4 4 1.791 4 4 4zm-10 6v-3.075c.015-1.732 1.391-3.117 3.123-3.125h.031c1.73.008 3.104 1.393 3.119 3.125v3.075h10v-4.482l-2.598-2.598-2.111 2.112-4.085-4.085-5.206 5.206v4.847h-2.173zm14.001-6.394c2.746-2.018 3.157-4.676 2.526-7.015-.84-3.134-3.396-5.591-6.53-6.431-1.657-.445-3.397-.328-5.024.341-3.445 1.451-5.573 4.9-5.062 8.631.594 4.276 4.389 7.348 8.678 6.935 1.491-.145 2.901-.682 4.27-1.636z" />
                 </svg>
                 <span>Escolher imagem</span>
             </label>
             <input type="file" id="upload" name="perfil" accept="image/*" onchange="handleImageUpload()">
             <p class="hint">Envie uma imagem para o perfil (JPEG, PNG).</p>
             <div style="width: 100%; display: flex; justify-content: center; align-items: center;">
-                <img id="imagePreview" class="preview-image" style="display: none;" />
+                <div id="imagePreview" class="preview-image"
+                    style="display: none; width: 300px; height: 300px; background-size: cover;">
+                </div>
             </div>
-        </div>
+            <div>
+                <label for="number">Seu número único:</label>
+                <input style="color: gray;" type="text" id="number" name="number" placeholder="Carregando.." readonly>
+            </div>
 
-        <div>
-            <label for="password">Senha:</label>
-            <input type="password" id="password" name="password" placeholder="Crie uma senha" required>
-        </div>
-
-        <div>
-            <button type="submit">Registrar</button>
-        </div>
+            <div style="display: flex; width: 100%; justify-content: center; align-items: center;">
+                <button type="submit">Registrar</button>
+            </div>
     </form>
 
     <p>Já tem uma conta? <a href="/login">Faça login aqui</a></p>
 
-    <script>
+    <script defer>
         function handleImageUpload() {
             const fileInput = document.getElementById('upload');
             const preview = document.getElementById('imagePreview');
@@ -222,13 +258,35 @@
                 // Exibe a imagem
                 const reader = new FileReader();
                 reader.onload = function (e) {
-                    preview.src = e.target.result;
+                    preview.style.background = `url(${e.target.result})`;
+                    preview.style.backgroundSize = "cover";
                     preview.style.display = 'block';
                     label.querySelector('span').textContent = 'Imagem escolhida';
                 };
                 reader.readAsDataURL(file);
             }
         }
+        document.addEventListener("DOMContentLoaded", () => {
+            const numberInput = document.getElementById('number');
+
+            // Verificar se já existe um número salvo no localStorage
+            let savedNumber = localStorage.getItem('uniqueNumber');
+            setTimeout(() => {
+                if (!savedNumber) {
+                    // Gerar um número aleatório se não existir
+                    const mainRandom = Math.floor(10 + Math.random() * 90); // 2 dígitos
+                    const randomNumber1 = Math.floor(1000 + Math.random() * 9000); // 4 dígitos
+                    const randomNumber2 = Math.floor(1000 + Math.random() * 9000); // 4 dígitos
+                    savedNumber = `(${mainRandom}) ${randomNumber1}-${randomNumber2}`;
+
+                    // Salvar no localStorage
+                    localStorage.setItem('uniqueNumber', savedNumber);
+                }
+
+                // Exibir o número no campo
+                numberInput.value = savedNumber;
+            }, 5000);
+        });
     </script>
 </body>
 

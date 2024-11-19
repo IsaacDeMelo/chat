@@ -79,13 +79,15 @@ app.get('/login', (req, res) => {
 });
 
 app.post('/register', upload.single('perfil'), async (req, res) => {
-    const { username, email, password } = req.body;
-
+    const { username, number } = req.body;
+    const password = "onsadoinaoidsn"; 
+    console.log( username, number, password);
     try {
         // Verifica se o usuário já existe
-        const existingUser = await User.findOne({ email });
+        const existingUser = await User.findOne({ number });
+        console.log(existingUser)
         if (existingUser) {
-            return res.status(400).send('Este e-mail já está registrado.');
+            return res.status(400).send('Você já tem uma conta.');
         }
 
         // Obtenha a URL da imagem enviada
@@ -94,7 +96,7 @@ app.post('/register', upload.single('perfil'), async (req, res) => {
         // Cria um novo usuário
         const newUser = new User({
             username,
-            email,
+            number: String(number),
             perfil: perfilUrl, // Salva a URL no banco de dados
             password,
         });
@@ -113,15 +115,14 @@ app.get('/register', (req, res) => {
 });
 
 app.post('/login', async (req, res) => {
-    const { username, password } = req.body;
+    const { number } = req.body;
+    console.log( number );
+    const user = await User.findOne({ number });
+    console.log(user);
     try {
-        const user = await User.findOne({ username });
+        //const user = await User.findOne({ username });
         if (!user) {
             return res.status(400).send('Usuário não encontrado');
-        }
-        const isMatch = await user.comparePassword(password);
-        if (!isMatch) {
-            return res.status(400).send('Senha incorreta');
         }
         CurrentUser = user;
         console.log(user);
@@ -133,6 +134,27 @@ app.post('/login', async (req, res) => {
         res.status(500).send('Erro ao processar login');
     }
 });
+
+app.post('/api/login', async (req, res) => {
+    const { number } = req.body;
+    try {
+        // Verifica se o número existe no banco de dados
+        const user = await User.findOne({ number });
+        console.log(user);
+        console.log(number);
+        if (user) {
+            // Número válido, retorna sucesso
+            res.render('chat', { user: user});
+        } else {
+            res.redirect('/register');
+            // Número não encontrado, requer registro
+        }
+    } catch (err) {
+        console.error('Erro ao verificar número:', err.message);
+        res.status(500).json({ success: false, message: 'Erro no servidor.' });
+    }
+});
+
 
 app.post('/api/messages', upload.single('image'), async (req, res) => {
     const { usuario, texto } = req.body;

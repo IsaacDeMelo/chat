@@ -118,6 +118,17 @@
 
         }
 
+        #global {
+            padding-top: 20px;
+            height: 100%;
+            width: 100%;
+            overflow-y: scroll;
+            background: url('https://i.pinimg.com/736x/58/c3/33/58c33377dfcbb3022493dec49d098b02.jpg');
+            background-size: cover;
+            background-attachment: fixed;
+            background-position: center;
+        }
+
         #messageInput:focus {
             border-color: darkgreen;
             box-shadow: 0 0 5px darkgreen
@@ -159,8 +170,15 @@
             }
 
             #global {
-                background-size: contain;
-                padding-bottom: 50px;
+                padding-top: 20px;
+                height: 100%;
+                width: 100%;
+                overflow-y: scroll;
+                background: url('https://i.pinimg.com/736x/58/c3/33/58c33377dfcbb3022493dec49d098b02.jpg');
+                background-attachment: fixed;
+                background-size: 300px;
+                background-position: top;
+
             }
 
 
@@ -185,7 +203,7 @@
             }
         }
 
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
             const imageInput = document.getElementById('imageInput');
             imageInput.addEventListener('change', previewImage);  // Usando eventListener
 
@@ -325,7 +343,7 @@
         }
 
         window.onload = loadMessages;
-        
+
 
         async function sendMessage(event) {
             event.preventDefault();
@@ -377,16 +395,14 @@
                 console.error('Erro ao enviar mensagem:', error);
             }
         }
-        
+
 
     </script>
 
 </head>
 
 <body>
-    <div id="global" style="width: 100%; overflow-y: scroll; background: url('https://i.pinimg.com/736x/58/c3/33/58c33377dfcbb3022493dec49d098b02.jpg');
-    background-size: cover;
-    background-position: center;">
+    <div id="global">
         <ul id="messages" style="margin-bottom: 70px; ">
             <!-- As mensagens serão carregadas aqui dinamicamente -->
         </ul>
@@ -397,7 +413,7 @@
     </div>
     <form id="messageForm" onsubmit="sendMessage(event)"
         style="background-color: rgb(24, 24, 24); display: flex; align-items: center; gap: 10px; padding: 10px; position: fixed; bottom: 0px; flex-direction: column;">
-        
+
         <div
             style=" background-color: rgb(24, 24, 24); display: flex; align-items: center; gap: 10px; padding: 10px; position: fixed; bottom: 0px; width: 100%;">
             <!-- Área de texto expandível -->
@@ -425,7 +441,7 @@
                 oninput="autoResize(this)"></textarea>
 
             <!-- Campo para upload de imagem -->
-            <input type="file" id="imageInput" accept="image/*" style="display: none;"/>
+            <input type="file" id="imageInput" accept="image/*" style="display: none;" />
             <!-- Botão de enviar -->
             <button id="messageButton" type="submit"
                 style="color: white; border: none; border-radius: 50%; width: 50px; height: 50px; display: flex; align-items: center; justify-content: center; font-size: 18px; cursor: pointer;">

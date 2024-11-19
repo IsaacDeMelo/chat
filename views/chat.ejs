@@ -344,8 +344,10 @@
 
         window.onload = loadMessages;
 
-
+        let C = 0;
         async function sendMessage(event) {
+            if (C == 0){
+            C++
             event.preventDefault();
 
             const input = document.getElementById('messageInput');
@@ -388,12 +390,16 @@
                             document.getElementById('messageInput').style.height = "50px";
                         }
                     }, 200);
+                    setTimeout(() => {
+                        C = 0;
+                    }, 2000);
                 } else {
                     console.error('Erro ao enviar mensagem');
                 }
             } catch (error) {
                 console.error('Erro ao enviar mensagem:', error);
             }
+        }
         }
 
 

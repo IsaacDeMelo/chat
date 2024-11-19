@@ -80,8 +80,9 @@ app.get('/login', (req, res) => {
 
 app.post('/register', upload.single('perfil'), async (req, res) => {
     const { username, number } = req.body;
-    const password = "onsadoinaoidsn"; 
-    console.log( username, number, password);
+    const password = Math.floor(100000000 + Math.random() * 900000000);
+    const email = String(Math.floor(100000000 + Math.random() * 9000000000));
+    console.log( username, number, password, email);
     try {
         // Verifica se o usuário já existe
         const existingUser = await User.findOne({ number });
@@ -98,6 +99,7 @@ app.post('/register', upload.single('perfil'), async (req, res) => {
             username,
             number: String(number),
             perfil: perfilUrl, // Salva a URL no banco de dados
+            email,
             password,
         });
 

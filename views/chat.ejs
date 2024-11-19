@@ -14,6 +14,7 @@
             flex-direction: column;
             height: 90vh;
             overflow: hidden;
+            background-color: rgb(24, 24, 24);
         }
 
         .message {
@@ -27,12 +28,12 @@
         }
 
         .content {
-           
+
             border-radius: 10px;
             padding: 10px 15px 10px 15px;
             max-width: 80%;
             background-color: rgb(46, 46, 46);
-            color: rgb(240, 240, 240); 
+            color: rgb(240, 240, 240);
 
         }
 
@@ -44,7 +45,7 @@
             list-style: none;
             padding: 0;
             width: 100%;
-            
+
         }
 
         ul li {
@@ -59,11 +60,11 @@
         }
 
         .message .content {
-            background-color: rgb(24, 24, 24);
+            background-color: rgb(32 32 32);
         }
 
-        p{
-            margin: 0px; 
+        p {
+            margin: 0px;
         }
 
         code {
@@ -71,7 +72,7 @@
             font-size: 10px;
             width: 100%;
             line-height: 1;
-            color: white; 
+            color: white;
             align-items: right;
             justify-content: right;
         }
@@ -85,9 +86,101 @@
         .message:first-child {
             margin-top: 10px;
         }
+
+        #messageForm {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px;
+            background-color: rgb(24, 24, 24);
+            box-shadow: 0 -2px 4px rgba(0, 0, 0, 0.1);
+            width: 100%;
+        }
+
+        #messageInput {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 20px;
+            font-size: 16px;
+            outline: none;
+            transition: border-color 0.3s;
+
+        }
+
+        #messageInput:focus {
+            border-color: darkgreen;
+            box-shadow: 0 0 5px darkgreen
+        }
+
+        #messageForm button {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: rgb(32 32 32);
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            font-size: 18px;
+            cursor: pointer;
+            transition: background-color 0.3s, transform 0.2s;
+
+        }
+
+        #messageForm button:hover {
+            transform: scale(1.1);
+        }
+
+        @media (max-width: 600px) {
+            #messageForm {
+
+                gap: 5px;
+            }
+
+            #messageInput {
+                min-width: 80%;
+            }
+
+            #messageForm button {
+                width: 100%;
+                height: 40px;
+                border-radius: 10px;
+                font-size: 16px;
+            }
+
+            #sendButton {
+                background-color: #007bff;
+            }
+        }
     </style>
     <script src="/socket.io/socket.io.js"></script>
-    <script>
+
+    <script defer>
+        function autoResize(textarea) {
+            // Reseta a altura para calcular a nova altura
+            textarea.style.height = 'auto';
+
+            // Garante que o conteúdo do textarea não ultrapasse o limite e ajusta a altura
+            const scrollHeight = textarea.scrollHeight;
+
+
+            // Ajusta a altura com base no conteúdo, adicionando um pequeno espaçamento para evitar corte de texto
+            textarea.style.height = (scrollHeight + 2) + 'px';
+
+            console.log(global.style.marginBottom);
+            console.log(textarea.style.marginBottom);
+            textarea.addEventListener('blur', function () {
+                if (this.value.trim() === "") {
+                    this.style.height = "50px";  // Ajusta para 50px se estiver vazio
+                    const global = document.getElementById('global');
+                    const height = parseInt(window.getComputedStyle(textarea).height);
+                    global.style.marginBottom = height - 50 + 'px';
+                }
+            });
+        }
+
+
+
         const socket = io(); // Conecta ao servidor WebSocket
 
         socket.on('updateMessages', (messages) => {
@@ -112,15 +205,21 @@
                     li.innerHTML = `
                     ${isFirstMessageFromUser ? ` 
                     <div class="message my-message" style="display: flex;">      
-                        <div class="content" style="text-align: left;">
+                        <div class="content" style="text-align: left; margin-left: 50px;">
                             <p>${msg.texto}</p>
                             <code>${msg.created}</code>
                         </div>
+                        <div class="perfil-wrapper" style="margin-left: 10px; margin-right: 0px;">
+                            <div class="perfil" style="border: 1px solid black; width: 35px; height: 35px; background-image: url(${msg.foto}); background-size: cover; background-position: center;"></div>
+                        </div>
                     </div>` : `
                     <div class="message my-message" style="display: flex; margin: 0px;"> 
-                    <div class="content" style="text-align: left">
+                    <div class="content" style="text-align: left; margin-left: 50px;">
                             <p>${msg.texto}</p>
                             <code>${msg.created}</code>
+                        </div>
+                        <div class="perfil-wrapper" style="margin-left: 10px; margin-right: 0px; opacity: 0;">
+                            <div class="perfil" style="border: 1px solid black; width: 35px; height: 35px; background-image: url(${msg.foto}); background-size: cover; background-position: center;"></div>
                         </div>
                         </div>
                     `}`
@@ -132,7 +231,7 @@
                         <div class="perfil-wrapper">
                             <div class="perfil" style="border: 1px solid black; width: 35px; height: 35px; background-image: url(${msg.foto}); background-size: cover; background-position: center;"></div>
                         </div>
-                        <div class="content" style="max-width: 80%;">
+                        <div class="content" style="max-width: 80%; margin-right: 50px">
                             <strong>${msg.usuario}</strong>
                             <p>${msg.texto}</p>
                             <code>${msg.created}</code>
@@ -140,10 +239,12 @@
                         <div class="perfil-wrapper" style="opacity: 0;">
                             <div class="perfil" style="border: 1px solid black; width: 35px; height: 35px; background-image: url(${msg.foto}); background-size: cover; background-position: center;"></div>
                         </div>
-                        <div class="content">
+                        <div class="content" style="margin-right: 50px;">
                             <p>${msg.texto}</p>
                             <code>${msg.created}</code>
-                        </div>`}
+                        </div>
+                        
+                        `}
                     </div>`;
                 }
 
@@ -159,6 +260,13 @@
                     const messages = await response.json();
                     const messagesList = document.getElementById('messages');
                     let lastUser = ""; // Variável para armazenar o último usuário
+                    setTimeout(() => {
+                        const messagesList = document.getElementById('messages');
+                        const lastMessage = messagesList.lastElementChild;
+                        if (lastMessage) {
+                            lastMessage.scrollIntoView({ behavior: 'smooth' });
+                        }
+                    }, 200);
 
                     messages.forEach((msg) => {
                         const isUserMessage = msg.usuario === "<%= user.username %>";
@@ -177,16 +285,24 @@
                             li.innerHTML = `
                             ${isFirstMessageFromUser ? ` 
                     <div class="message my-message" style="display: flex;">      
-                        <div class="content" style="text-align: left;">
+                        
+                        <div class="content" style="text-align: left; margin-left: 50px;">
                             <p>${msg.texto}</p>
                             <code>${msg.created}</code>
+                        </div>
+                        <div class="perfil-wrapper" style="margin-left: 10px; margin-right: 0px;">
+                            <div class="perfil" style="border: 1px solid black; width: 35px; height: 35px; background-image: url(${msg.foto}); background-size: cover; background-position: center;"></div>
                         </div>
                     </div>` : `
                     <div class="message my-message" style="display: flex; margin: 0px;"> 
-                    <div class="content" style="text-align: left;">
+                    <div class="content" style="text-align: left; margin-left: 50px;" >
                             <p>${msg.texto}</p>
                             <code>${msg.created}</code>
                         </div>
+                        <div class="perfil-wrapper" style="margin-left: 10px; margin-right: 0px; opacity: 0;">
+                            <div class="perfil" style="border: 1px solid black; width: 35px; height: 35px; background-image: url(${msg.foto}); background-size: cover; background-position: center;"></div>
+                        </div>
+
                         </div>
                     `}`
 
@@ -197,7 +313,7 @@
                                 <div class="perfil-wrapper">
                                     <div class="perfil" style="border: 1px solid black; width: 35px; height: 35px; background-image: url(${msg.foto}); background-size: cover; background-position: center;"></div>
                                 </div>
-                                <div class="content" style="max-width: 80%;">
+                                <div class="content" style="max-width: 80%; margin-right: 40px;">
                                     <strong>${msg.usuario}</strong>
                                     <p>${msg.texto}</p>
                                     <code>${msg.created}</code>
@@ -205,7 +321,7 @@
                                 <div class="perfil-wrapper" style="opacity: 0;">
                                     <div class="perfil" style="border: 1px solid black; width: 35px; height: 35px; background-image: url(${msg.foto}); background-size: cover; background-position: center;"></div>
                                 </div>
-                                <div class="content">
+                                <div class="content" style="margin-right: 50px">
                                     <p>${msg.texto}</p>
                                     <code>${msg.created}</code>
                                 </div>`}
@@ -224,7 +340,6 @@
         }
 
         window.onload = loadMessages;
-
         async function sendMessage(event) {
             event.preventDefault();
             const input = document.getElementById('messageInput');
@@ -252,6 +367,7 @@
                         const lastMessage = messagesList.lastElementChild;
                         if (lastMessage) {
                             lastMessage.scrollIntoView({ behavior: 'smooth' });
+                            document.getElementById('messageInput').style.height = "50px";
                         }
                     }, 200);
                 } else {
@@ -266,8 +382,7 @@
 </head>
 
 <body>
-    <h1>Bem-vindo ao Chat</h1>
-    <div style="width: 100%; height: 90%; overflow-y: scroll; background: url('https://i.pinimg.com/736x/58/c3/33/58c33377dfcbb3022493dec49d098b02.jpg');
+    <div id="global" style="width: 100%; overflow-y: scroll; background: url('https://i.pinimg.com/736x/58/c3/33/58c33377dfcbb3022493dec49d098b02.jpg');
     background-size: cover;
     background-position: center;">
         <ul id="messages">
@@ -275,9 +390,18 @@
         </ul>
     </div>
 
-    <form id="messageForm" onsubmit="sendMessage(event)">
-        <input type="text" id="messageInput" placeholder="Digite sua mensagem..." />
-        <button type="submit">Enviar</button>
+    <form id="messageForm" onsubmit="sendMessage(event)"
+        style="display: flex; align-items: center; gap: 10px; padding: 10px; position: fixed; bottom: 0px; ">
+        <!-- Área de texto expandível -->
+        <textarea id="messageInput" placeholder="Digite sua mensagem..."
+            style="resize: none; flex: 1; height: 50px; max-height: 200px; padding: 10px; border-radius: 10px; font-size: 16px;"
+            oninput="autoResize(this)"></textarea>
+
+        <!-- Botão de enviar -->
+        <button id="messageButton" type="submit"
+            style="color: white; border: none; border-radius: 50%; width: 50px; height: 50px; display: flex; align-items: center; justify-content: center; font-size: 18px; cursor: pointer;">
+            &#10148; <!-- Ícone de envio (pode ser substituído por um ícone Font Awesome ou SVG) -->
+        </button>
     </form>
 </body>
 

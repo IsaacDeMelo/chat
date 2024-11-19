@@ -28,13 +28,11 @@
         }
 
         .content {
-
             border-radius: 10px;
             padding: 10px 15px 10px 15px;
             max-width: 80%;
             background-color: rgb(46, 46, 46);
             color: rgb(240, 240, 240);
-
         }
 
         .perfil {
@@ -53,6 +51,18 @@
             margin: 0px 0px 10px 0px;
             /* Margem padrão para mensagens */
 
+        }
+
+        .greenImg {
+            background-color: rgb(21, 80, 48);
+            border: 5px solid rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+        }
+
+        .blackImg {
+            background-color: rgb(32 32 32);
+            border-radius: 10px;
+            border: 5px solid rgba(0, 0, 0, 0.1);
         }
 
         .message.my-message .content {
@@ -131,7 +141,7 @@
             transform: scale(1.1);
         }
 
-        @media (max-width: 600px) {
+        @media (min-width: 500px) {
             #messageForm {
 
                 gap: 5px;
@@ -148,14 +158,47 @@
                 font-size: 16px;
             }
 
-            #sendButton {
-                background-color: #007bff;
+            #global {
+                background-size: contain;
+                padding-bottom: 50px;
             }
+
+
         }
     </style>
     <script src="/socket.io/socket.io.js"></script>
 
     <script defer>
+        function previewImage(event) {
+            const file = event.target.files[0];
+            const reader = new FileReader();
+
+            reader.onload = function (e) {
+                const imagePreview = document.getElementById('imagePreview');
+                const previewImage = document.getElementById('previewImage');
+                previewImage.src = e.target.result;
+                imagePreview.style.display = 'block'; // Exibe a pré-visualização
+            }
+
+            if (file) {
+                reader.readAsDataURL(file); // Lê o arquivo de imagem
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const imageInput = document.getElementById('imageInput');
+            imageInput.addEventListener('change', previewImage);  // Usando eventListener
+
+            const previewImageElement = document.getElementById('previewImage');
+            previewImageElement.addEventListener('click', function () {
+                // Reseta o campo de entrada de imagem quando clicar na pré-visualização
+                const imageInput = document.getElementById('imageInput');
+                imageInput.value = ''; // Cancela o upload da imagem
+                document.getElementById('imagePreview').style.display = 'none'; // Oculta a pré-visualização
+            });
+        });
+
+
         function autoResize(textarea) {
             // Reseta a altura para calcular a nova altura
             textarea.style.height = 'auto';
@@ -179,8 +222,6 @@
             });
         }
 
-
-
         const socket = io(); // Conecta ao servidor WebSocket
 
         socket.on('updateMessages', (messages) => {
@@ -203,51 +244,60 @@
 
                 if (isUserMessage) {
                     li.innerHTML = `
-                    ${isFirstMessageFromUser ? ` 
-                    <div class="message my-message" style="display: flex;">      
-                        <div class="content" style="text-align: left; margin-left: 50px;">
-                            <p>${msg.texto}</p>
-                            <code>${msg.created}</code>
-                        </div>
-                        <div class="perfil-wrapper" style="margin-left: 10px; margin-right: 0px;">
-                            <div class="perfil" style="border: 1px solid black; width: 35px; height: 35px; background-image: url(${msg.foto}); background-size: cover; background-position: center;"></div>
-                        </div>
-                    </div>` : `
-                    <div class="message my-message" style="display: flex; margin: 0px;"> 
-                    <div class="content" style="text-align: left; margin-left: 50px;">
-                            <p>${msg.texto}</p>
-                            <code>${msg.created}</code>
-                        </div>
-                        <div class="perfil-wrapper" style="margin-left: 10px; margin-right: 0px; opacity: 0;">
-                            <div class="perfil" style="border: 1px solid black; width: 35px; height: 35px; background-image: url(${msg.foto}); background-size: cover; background-position: center;"></div>
-                        </div>
-                        </div>
-                    `}`
-
+    ${isFirstMessageFromUser ? `
+        <div class="message my-message" style="display: flex; margin: 0px; flex-direction: column;">      
+            ${msg.imageUrl ? `<img class="greenImg" src="${msg.imageUrl}" alt="Image" style="max-width: 100%; margin-bottom: 10px; margin-left: 50px; margin-right: 40px;" />` : ''}
+            <div style="display: flex; justify-content: right">
+            <div class="content" style="text-align: left; margin-left: 50px;">
+                <p>${msg.texto}</p>
+                <code>${msg.created}</code>
+            </div>
+            <div class="perfil-wrapper" style="margin-left: 10px; margin-right: 0px;">
+                <div class="perfil" style="border: 1px solid black; width: 35px; height: 35px; background-image: url(${msg.foto}); background-size: cover; background-position: center;"></div>
+            </div>
+        </div>` : `
+        <div class="message my-message" style="display: flex; margin: 0px; flex-direction: column"> 
+            ${msg.imageUrl ? `<img class="greenImg" src="${msg.imageUrl}" alt="Image" style="max-width: 100%; margin-bottom: 10px; margin-left: 50px; margin-right: 40px;" />` : ''}
+            <div style="display: flex; justify-content: right">
+            <div class="content" style="text-align: left; margin-left: 50px;">
+                <p>${msg.texto}</p>
+                <code>${msg.created}</code>
+            </div>
+            <div class="perfil-wrapper" style="margin-left: 10px; margin-right: 0px; ${msg.imageUrl ? "opacity: 1;" : "opacity: 0"}">
+                <div class="perfil" style="border: 1px solid black; width: 35px; height: 35px; background-image: url(${msg.foto}); background-size: cover; background-position: center;"></div>
+            </div>
+            </div>
+        </div>
+    `}
+    `;
                 } else {
                     li.innerHTML = `
-                    <div class="message" style="display: flex; flex-direction: row; margin-top: ${marginTop}">       
-                        ${isFirstMessageFromUser ? `
-                        <div class="perfil-wrapper">
-                            <div class="perfil" style="border: 1px solid black; width: 35px; height: 35px; background-image: url(${msg.foto}); background-size: cover; background-position: center;"></div>
-                        </div>
-                        <div class="content" style="max-width: 80%; margin-right: 50px">
-                            <strong>${msg.usuario}</strong>
-                            <p>${msg.texto}</p>
-                            <code>${msg.created}</code>
-                        </div>` : `
-                        <div class="perfil-wrapper" style="opacity: 0;">
-                            <div class="perfil" style="border: 1px solid black; width: 35px; height: 35px; background-image: url(${msg.foto}); background-size: cover; background-position: center;"></div>
-                        </div>
-                        <div class="content" style="margin-right: 50px;">
-                            <p>${msg.texto}</p>
-                            <code>${msg.created}</code>
-                        </div>
-                        
-                        `}
-                    </div>`;
+    <div class="message" style="display: flex; flex-direction: column; margin-top: ${marginTop}">
+        ${msg.imageUrl ? `<img class="blackImg" src="${msg.imageUrl}" alt="Image" style="max-width: 100%; margin-bottom: 10px; margin-left: 40px; margin-right: 50px;" />` : ''}
+        ${isFirstMessageFromUser ? `
+        <div style="display: flex; justify-content: left">
+            <div class="perfil-wrapper">
+                <div class="perfil" style="border: 1px solid black; width: 35px; height: 35px; background-image: url(${msg.foto}); background-size: cover; background-position: center;"></div>
+            </div>
+            <div class="content" style="max-width: 80%; margin-right: 50px">
+                <strong>${msg.usuario}</strong>
+                <p>${msg.texto}</p>
+                <code>${msg.created}</code>
+            </div>
+            </div>
+            ` : `
+            <div style="display: flex; justify-content: left">
+            <div class="perfil-wrapper" style="${msg.imageUrl ? "opacity: 1;" : "opacity: 0"}">
+                <div class="perfil" style="border: 1px solid black; width: 35px; height: 35px; background-image: url(${msg.foto}); background-size: cover; background-position: center;"></div>
+            </div>
+            <div class="content" style="margin-right: 50px;">
+                <p>${msg.texto}</p>
+                <code>${msg.created}</code>
+            </div>
+            </div>
+        `}
+    </div>`;
                 }
-
                 lastUser = msg.usuario; // Atualiza o último usuário
                 messagesList.appendChild(li);
             });
@@ -266,102 +316,52 @@
                         if (lastMessage) {
                             lastMessage.scrollIntoView({ behavior: 'smooth' });
                         }
-                    }, 200);
-
-                    messages.forEach((msg) => {
-                        const isUserMessage = msg.usuario === "<%= user.username %>";
-                        const isFirstMessageFromUser = msg.usuario !== lastUser;
-
-                        const li = document.createElement('li');
-
-                        // Aplica a margem maior apenas para a primeira mensagem de uma sequência
-                        li.style.marginTop = isFirstMessageFromUser ? '0px' : '0px';
-                        li.style.marginBottom = isFirstMessageFromUser ? '0px' : '0px';
-                        li.style.paddingTop = isFirstMessageFromUser ? '0px' : '0px';
-                        li.style.paddingBottom = isFirstMessageFromUser ? '5px' : '5px';
-                        const marginTop = isFirstMessageFromUser ? '10px' : '0px'; // Menor espaçamento para mensagens subsequentes
-
-                        if (isUserMessage) {
-                            li.innerHTML = `
-                            ${isFirstMessageFromUser ? ` 
-                    <div class="message my-message" style="display: flex;">      
-                        
-                        <div class="content" style="text-align: left; margin-left: 50px;">
-                            <p>${msg.texto}</p>
-                            <code>${msg.created}</code>
-                        </div>
-                        <div class="perfil-wrapper" style="margin-left: 10px; margin-right: 0px;">
-                            <div class="perfil" style="border: 1px solid black; width: 35px; height: 35px; background-image: url(${msg.foto}); background-size: cover; background-position: center;"></div>
-                        </div>
-                    </div>` : `
-                    <div class="message my-message" style="display: flex; margin: 0px;"> 
-                    <div class="content" style="text-align: left; margin-left: 50px;" >
-                            <p>${msg.texto}</p>
-                            <code>${msg.created}</code>
-                        </div>
-                        <div class="perfil-wrapper" style="margin-left: 10px; margin-right: 0px; opacity: 0;">
-                            <div class="perfil" style="border: 1px solid black; width: 35px; height: 35px; background-image: url(${msg.foto}); background-size: cover; background-position: center;"></div>
-                        </div>
-
-                        </div>
-                    `}`
-
-                        } else {
-                            li.innerHTML = `
-                            <div class="message" style="display: flex; flex-direction: row; margin-top: ${marginTop}">       
-                                ${isFirstMessageFromUser ? `
-                                <div class="perfil-wrapper">
-                                    <div class="perfil" style="border: 1px solid black; width: 35px; height: 35px; background-image: url(${msg.foto}); background-size: cover; background-position: center;"></div>
-                                </div>
-                                <div class="content" style="max-width: 80%; margin-right: 40px;">
-                                    <strong>${msg.usuario}</strong>
-                                    <p>${msg.texto}</p>
-                                    <code>${msg.created}</code>
-                                </div>` : `
-                                <div class="perfil-wrapper" style="opacity: 0;">
-                                    <div class="perfil" style="border: 1px solid black; width: 35px; height: 35px; background-image: url(${msg.foto}); background-size: cover; background-position: center;"></div>
-                                </div>
-                                <div class="content" style="margin-right: 50px">
-                                    <p>${msg.texto}</p>
-                                    <code>${msg.created}</code>
-                                </div>`}
-                            </div>`;
-                        }
-
-                        lastUser = msg.usuario; // Atualiza o último usuário
-                        messagesList.appendChild(li);
-                    });
-                } else {
-                    console.error('Erro ao carregar mensagens');
+                    }, 1000);
                 }
+
             } catch (error) {
                 console.error('Erro ao carregar mensagens:', error);
             }
         }
 
         window.onload = loadMessages;
+        
+
         async function sendMessage(event) {
             event.preventDefault();
+
             const input = document.getElementById('messageInput');
             const usuario = "<%= user.username %>";
             const texto = input.value.trim();
+            const imageInput = document.getElementById('imageInput');  // Referência ao input de imagem
 
-            if (!texto) {
-                alert('Digite uma mensagem!');
+            if (!texto && imageInput.files.length === 0) {
+                alert('Digite uma mensagem ou selecione uma imagem!');
                 return;
+            }
+
+            // Cria o FormData para enviar tanto texto quanto imagem
+            const formData = new FormData();
+            formData.append('usuario', usuario);
+            formData.append('texto', texto);
+
+            // Se uma imagem foi selecionada, adiciona ela ao FormData
+            if (imageInput.files.length > 0) {
+                formData.append('image', imageInput.files[0]);
             }
 
             try {
                 const response = await fetch('/api/messages', {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({ usuario, texto }),
+                    body: formData, // Envia o FormData
                 });
 
+
                 if (response.ok) {
-                    input.value = ''; // Limpa o campo
+                    input.value = ''; // Limpa o campo de texto
+                    imageInput.value = ''; // Limpa o campo de imagem (se houver)
+
+                    // Aguarda a atualização da interface após a mensagem ser enviada
                     setTimeout(() => {
                         const messagesList = document.getElementById('messages');
                         const lastMessage = messagesList.lastElementChild;
@@ -377,6 +377,8 @@
                 console.error('Erro ao enviar mensagem:', error);
             }
         }
+        
+
     </script>
 
 </head>
@@ -385,23 +387,51 @@
     <div id="global" style="width: 100%; overflow-y: scroll; background: url('https://i.pinimg.com/736x/58/c3/33/58c33377dfcbb3022493dec49d098b02.jpg');
     background-size: cover;
     background-position: center;">
-        <ul id="messages">
+        <ul id="messages" style="margin-bottom: 70px; ">
             <!-- As mensagens serão carregadas aqui dinamicamente -->
         </ul>
     </div>
-
+    <div id="imagePreview" style="margin-top: 10px; display: none;">
+        <img id="previewImage" src="" alt="Pré-visualização da imagem"
+            style="min-height: 100px; max-width: 100%;border-radius: 8px; padding-left: 10px; padding-right: 10px;" />
+    </div>
     <form id="messageForm" onsubmit="sendMessage(event)"
-        style="display: flex; align-items: center; gap: 10px; padding: 10px; position: fixed; bottom: 0px; ">
-        <!-- Área de texto expandível -->
-        <textarea id="messageInput" placeholder="Digite sua mensagem..."
-            style="resize: none; flex: 1; height: 50px; max-height: 200px; padding: 10px; border-radius: 10px; font-size: 16px;"
-            oninput="autoResize(this)"></textarea>
+        style="background-color: rgb(24, 24, 24); display: flex; align-items: center; gap: 10px; padding: 10px; position: fixed; bottom: 0px; flex-direction: column;">
+        
+        <div
+            style=" background-color: rgb(24, 24, 24); display: flex; align-items: center; gap: 10px; padding: 10px; position: fixed; bottom: 0px; width: 100%;">
+            <!-- Área de texto expandível -->
+            <button type="button" onclick="document.getElementById('imageInput').click()"
+                style=" padding: 10px; color: white; border: none; border-radius: 50%; width: 50px; height: 50px; display: flex; align-items: center; justify-content: center; font-size: 18px; cursor: pointer;">
+                <svg width="64px" height="64px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
+                    <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g>
+                    <g id="SVGRepo_iconCarrier">
+                        <path
+                            d="M3 13V11C3 7.22876 3 5.34315 4.17157 4.17157C5.34315 3 7.22876 3 11 3H13C16.7712 3 18.6569 3 19.8284 4.17157C21 5.34315 21 7.22876 21 11V13C21 16.7712 21 18.6569 19.8284 19.8284C18.6569 21 16.7712 21 13 21H12"
+                            stroke="#ffffff"></path>
+                        <path fill-rule="evenodd" clip-rule="evenodd"
+                            d="M18.9976 14.2904L18.4033 13.6961L18.3931 13.6858L18.393 13.6858C18.3245 13.6173 18.2784 13.5712 18.2394 13.5353C17.0477 12.4403 15.1454 12.749 14.3611 14.1647C14.3354 14.2111 14.3062 14.2694 14.2628 14.3561L14.2564 14.369C14.227 14.4278 14.22 14.4416 14.2161 14.4486C14.0513 14.7448 13.6458 14.7948 13.4142 14.5474C13.4087 14.5415 13.3985 14.5298 13.3557 14.4799L8.37962 8.67449C8.19991 8.46483 7.88426 8.44055 7.6746 8.62026C7.46494 8.79997 7.44065 9.11562 7.62037 9.32528L12.5964 15.1307L12.6038 15.1393L12.6038 15.1393C12.6352 15.1759 12.6614 15.2066 12.6842 15.2309C13.3793 15.9731 14.5957 15.8233 15.09 14.9348C15.1062 14.9056 15.1242 14.8695 15.1458 14.8263L15.1508 14.8162C15.203 14.712 15.2218 14.6746 15.2358 14.6493C15.7064 13.7999 16.8478 13.6147 17.5628 14.2717C17.5841 14.2912 17.6138 14.3208 17.6962 14.4032L18.9755 15.6825C18.9887 15.2721 18.9948 14.812 18.9976 14.2904Z"
+                            fill="#ffffff"></path>
+                        <circle cx="16.5" cy="7.5" r="1.5" fill="#ffffff"></circle>
+                        <path
+                            d="M8 16V15.5H8.5V16H8ZM3.31235 20.3904C3.09672 20.5629 2.78207 20.528 2.60957 20.3123C2.43706 20.0967 2.47202 19.7821 2.68765 19.6096L3.31235 20.3904ZM7.5 21V16H8.5V21H7.5ZM8 16.5H3V15.5H8V16.5ZM8.31235 16.3904L3.31235 20.3904L2.68765 19.6096L7.68765 15.6096L8.31235 16.3904Z"
+                            fill="#ffffff"></path>
+                    </g>
+                </svg>
+            </button>
+            <textarea id="messageInput" placeholder="Digite sua mensagem..."
+                style="resize: none; flex: 1; height: 50px; max-height: 200px; padding: 10px; border-radius: 10px; font-size: 16px;"
+                oninput="autoResize(this)"></textarea>
 
-        <!-- Botão de enviar -->
-        <button id="messageButton" type="submit"
-            style="color: white; border: none; border-radius: 50%; width: 50px; height: 50px; display: flex; align-items: center; justify-content: center; font-size: 18px; cursor: pointer;">
-            &#10148; <!-- Ícone de envio (pode ser substituído por um ícone Font Awesome ou SVG) -->
-        </button>
+            <!-- Campo para upload de imagem -->
+            <input type="file" id="imageInput" accept="image/*" style="display: none;"/>
+            <!-- Botão de enviar -->
+            <button id="messageButton" type="submit"
+                style="color: white; border: none; border-radius: 50%; width: 50px; height: 50px; display: flex; align-items: center; justify-content: center; font-size: 18px; cursor: pointer;">
+                &#10148; <!-- Ícone de envio -->
+            </button>
+        </div>
     </form>
 </body>
 

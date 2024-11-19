@@ -126,6 +126,7 @@ app.post('/login', async (req, res) => {
         CurrentUser = user;
         console.log(user);
         res.render('chat', {user: user});
+        
     } catch (err) {
         console.log(err);
         const messages = await Message.find();
@@ -133,14 +134,26 @@ app.post('/login', async (req, res) => {
     }
 });
 
-app.post('/api/messages', async (req, res) => {
+app.post('/api/messages', upload.single('image'), async (req, res) => {
     const { usuario, texto } = req.body;
     const user = await User.findOne({ username: usuario });
     const foto = user?.perfil;
     const created = moment().tz('America/Sao_Paulo').format('hh:mm A');
+    let imageUrl = null;
+
+    if (req.file) {
+        imageUrl = req.file.path; // URL da imagem no Cloudinary
+    }
 
     try {
-        const newMessage = new Message({ usuario, texto, foto, created });
+        const newMessage = new Message({
+            usuario,
+            texto,
+            foto,
+            created,
+            imageUrl // Salva a URL da imagem, se houver
+        });
+
         await newMessage.save();
         console.log('Mensagem salva:', newMessage);
         notifyClients(); // Notifica os clientes
@@ -154,8 +167,8 @@ app.post('/api/messages', async (req, res) => {
 app.get('/api/messages', async (req, res) => {
     try {
         const messages = await Message.find();
-        console.log(messages);
         res.json(messages);
+        notifyClients();
     } catch (err) {
         res.status(500).json({ error: 'Erro ao buscar mensagens' });
     }

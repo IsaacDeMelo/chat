@@ -16,6 +16,10 @@ const messageSchema = new mongoose.Schema(
       type: String, // URL da foto
       default: null, // Permite mensagens sem foto
     },
+    imageUrl: {
+      type: String,
+      default: null
+    },
     created: {
       type: String, // URL da foto
       default: null, // Permite mensagens sem foto

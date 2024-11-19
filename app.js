@@ -175,6 +175,7 @@ app.post('/api/messages', upload.single('image'), async (req, res) => {
         const currentTime = moment(); // Hora atual
 
         if (lastMessage && currentTime.diff(moment(lastMessage), 'seconds') < 2) {
+            console.log('fala dele');
             return res.status(400).json({ error: 'Espere pelo menos 2 segundos para enviar outra mensagem.' });
         }
 

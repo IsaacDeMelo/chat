@@ -168,6 +168,20 @@ app.post('/api/messages', upload.single('image'), async (req, res) => {
     }
 
     try {
+        // Verificar se o usuário enviou uma mensagem recentemente (menos de 2 segundos)
+        const lastMessage = user?.lastMessageTime;
+        const currentTime = moment(); // Hora atual
+
+        if (lastMessage && currentTime.diff(moment(lastMessage), 'seconds') < 2) {
+            return res.status(400).json({ error: 'Espere pelo menos 2 segundos para enviar outra mensagem.' });
+        }
+
+        // Atualizar o tempo da última mensagem do usuário
+        user.lastMessageTime = currentTime;
+
+        await user.save(); // Salva o tempo da última mensagem
+
+        // Criar e salvar a nova mensagem
         const newMessage = new Message({
             usuario,
             texto,
@@ -185,6 +199,7 @@ app.post('/api/messages', upload.single('image'), async (req, res) => {
         res.status(500).json({ error: 'Erro ao salvar mensagem' });
     }
 });
+
 
 app.get('/api/messages', async (req, res) => {
     try {

@@ -8,7 +8,11 @@ const UserSchema = new Schema({
     username: { type: String, required: true, unique: true },
     number: { type: String, required: true, unique: true },
     perfil: { type: String, required: true },
-    password: { type: String, required: false }
+    password: { type: String, required: false },
+    lastMessageTime: {
+        type: Date, // Armazena o tempo da última mensagem
+        default: null
+    }
 });
 
 // Método para comparar senhas

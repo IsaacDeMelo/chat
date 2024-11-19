@@ -322,6 +322,17 @@
         });
 
         async function loadMessages() {
+            document.getElementById('messageForm').addEventListener('click', function () {
+                var button = this;
+
+                // Desativa o botão
+                button.disabled = true;
+
+                // Após 2 segundos, ativa novamente o botão
+                setTimeout(function () {
+                    button.disabled = false;
+                }, 2000); // 2000ms = 2 segundos
+            });
             try {
                 const response = await fetch('/api/messages');
                 if (response.ok) {
@@ -343,13 +354,8 @@
         }
 
         window.onload = loadMessages;
-
-        let C = 0;
         async function sendMessage(event) {
-            if (C == 0){
-            C++
             event.preventDefault();
-
             const input = document.getElementById('messageInput');
             const usuario = "<%= user.username %>";
             const texto = input.value.trim();
@@ -390,9 +396,6 @@
                             document.getElementById('messageInput').style.height = "50px";
                         }
                     }, 200);
-                    setTimeout(() => {
-                        C = 0;
-                    }, 2000);
                 } else {
                     console.error('Erro ao enviar mensagem');
                 }
@@ -400,7 +403,8 @@
                 console.error('Erro ao enviar mensagem:', error);
             }
         }
-        }
+
+
 
 
     </script>

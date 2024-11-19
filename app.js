@@ -170,21 +170,15 @@ app.post('/api/messages', upload.single('image'), async (req, res) => {
     }
 
     try {
-        // Verificar se o usuário enviou uma mensagem recentemente (menos de 2 segundos)
-        const lastMessage = user?.lastMessageTime;
-        const currentTime = moment(); // Hora atual
+        // Verifica a última mensagem do usuário no banco de dados
+        const lastMessage = await Message.findOne({ usuario }).sort({ createdAt: -1 });
 
-        if (lastMessage && currentTime.diff(moment(lastMessage), 'seconds') < 2) {
-            console.log('fala dele');
-            return res.status(400).json({ error: 'Espere pelo menos 2 segundos para enviar outra mensagem.' });
+        // Verifica se a mensagem enviada é idêntica à última mensagem
+        if (lastMessage && lastMessage.texto === texto) {
+            return res.status(400).json({ error: 'Você não pode enviar a mesma mensagem duas vezes seguidas.' });
         }
 
-        // Atualizar o tempo da última mensagem do usuário
-        user.lastMessageTime = currentTime;
-
-        await user.save(); // Salva o tempo da última mensagem
-
-        // Criar e salvar a nova mensagem
+        // Cria e salva a nova mensagem
         const newMessage = new Message({
             usuario,
             texto,
@@ -195,13 +189,16 @@ app.post('/api/messages', upload.single('image'), async (req, res) => {
 
         await newMessage.save();
         console.log('Mensagem salva:', newMessage);
-        notifyClients(); // Notifica os clientes
+
+        // Notifica os clientes conectados
+        notifyClients();
         res.status(201).json(newMessage);
     } catch (err) {
         console.error('Erro ao salvar mensagem:', err.message);
         res.status(500).json({ error: 'Erro ao salvar mensagem' });
     }
 });
+
 
 
 app.get('/api/messages', async (req, res) => {

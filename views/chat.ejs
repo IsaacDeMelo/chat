@@ -357,6 +357,8 @@
         async function sendMessage(event) {
             event.preventDefault();
             const input = document.getElementById('messageInput');
+            const messageButton = document.getElementById('messageButton');
+            messageButton.disabled = true; 
             const usuario = "<%= user.username %>";
             const texto = input.value.trim();
             const imageInput = document.getElementById('imageInput');  // Referência ao input de imagem
@@ -394,6 +396,7 @@
                         if (lastMessage) {
                             lastMessage.scrollIntoView({ behavior: 'smooth' });
                             document.getElementById('messageInput').style.height = "50px";
+                            messageButton.disabled = true; 
                         }
                     }, 200);
                 } else {

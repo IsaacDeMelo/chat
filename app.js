@@ -15,7 +15,7 @@ const { CloudinaryStorage } = require('multer-storage-cloudinary');
 const multer = require('multer');
 
 cloudinary.config({
-    cloud_name: "duf0jgp5g", // Adicione no .env
+    cloud_name: "duf0jgp5g", // Adicione no .env 
     api_key: 565451444635366,       // Adicione no .env
     api_secret: "0aQZwIXBXwe2hKZImALQDKevbVw", // Adicione no .env
 });
@@ -93,7 +93,7 @@ app.post('/register', upload.single('perfil'), async (req, res) => {
 
         // Obtenha a URL da imagem enviada
         const perfilUrl = req.file.path;
-    
+        console.log(perfilUrl);
         // Cria um novo usuário
         const newUser = new User({
             username,
@@ -101,6 +101,7 @@ app.post('/register', upload.single('perfil'), async (req, res) => {
             perfil: perfilUrl, // Salva a URL no banco de dados
             email,
             password,
+
         });
 
         await newUser.save();
@@ -146,7 +147,7 @@ app.post('/api/login', async (req, res) => {
         console.log(number);
         if (user) {
             // Número válido, retorna sucesso
-            res.render('chat', { user: user});
+            res.render('home', { user: user});
         } else {
             res.redirect('/register');
             // Número não encontrado, requer registro

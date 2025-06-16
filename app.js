@@ -147,7 +147,7 @@ app.post('/api/login', async (req, res) => {
         console.log(number);
         if (user) {
             // Número válido, retorna sucesso
-            res.render('home', { user: user});
+            res.render('chat', { user: user});
         } else {
             res.redirect('/register');
             // Número não encontrado, requer registro

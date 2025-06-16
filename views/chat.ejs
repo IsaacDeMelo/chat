@@ -9,12 +9,13 @@
         integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
     <style>
         body {
-            display: flex;
-            align-items: center;
-            flex-direction: column;
-            height: 90vh;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: #121212;
+            color: #e0e0e0;
+            height: 100vh;
             overflow: hidden;
-            background-color: rgb(24, 24, 24);
         }
 
         .message {
@@ -28,11 +29,13 @@
         }
 
         .content {
-            border-radius: 10px;
-            padding: 10px 15px 10px 15px;
-            max-width: 80%;
-            background-color: rgb(46, 46, 46);
-            color: rgb(240, 240, 240);
+            border-radius: 12px;
+            padding: 12px 16px;
+            max-width: 75%;
+            background-color: #2d2d2d;
+            color: #ffffff;
+            word-break: break-word;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.1);
         }
 
         .perfil {
@@ -53,11 +56,6 @@
 
         }
 
-        .greenImg {
-            background-color: rgb(21, 80, 48);
-            border: 5px solid rgba(0, 0, 0, 0.1);
-            border-radius: 10px;
-        }
 
         .blackImg {
             background-color: rgb(32 32 32);
@@ -66,11 +64,11 @@
         }
 
         .message.my-message .content {
-            background-color: rgb(21, 80, 48);
+            background-color: #1a73e8;
         }
 
         .message .content {
-            background-color: rgb(32 32 32);
+            background-color: #2d2d2d;
         }
 
         p {
@@ -100,22 +98,29 @@
         #messageForm {
             display: flex;
             align-items: center;
-            gap: 10px;
-            padding: 10px;
-            background-color: rgb(24, 24, 24);
-            box-shadow: 0 -2px 4px rgba(0, 0, 0, 0.1);
+            gap: 8px;
+            padding: 12px 16px;
+            background-color: #1e1e1e;
+            box-shadow: 0 -1px 3px rgba(0,0,0,0.3);
             width: 100%;
+            box-sizing: border-box;
         }
 
         #messageInput {
             flex: 1;
-            padding: 10px;
-            border: 1px solid #ccc;
-            border-radius: 20px;
+            padding: 12px 16px;
+            border: none;
+            border-radius: 24px;
             font-size: 16px;
             outline: none;
-            transition: border-color 0.3s;
-
+            background-color: #2d2d2d;
+            color: #ffffff;
+            min-height: 48px;
+            max-height: 120px;
+            resize: none;
+            box-shadow: inset 0 1px 2px rgba(0,0,0,0.2);
+            transition: height 0.2s ease;
+            overflow-y: hidden;
         }
 
         #global {
@@ -130,8 +135,8 @@
         }
 
         #messageInput:focus {
-            border-color: darkgreen;
-            box-shadow: 0 0 5px darkgreen
+            border-color: #1a73e8;
+            box-shadow: 0 0 5px rgba(26, 115, 232, 0.5);
         }
 
         #messageForm button {
@@ -190,18 +195,32 @@
     <script defer>
         function previewImage(event) {
             const file = event.target.files[0];
+            if (!file) return;
+
+            // Check if file is an image
+            if (!file.type.match('image.*')) {
+                alert('Por favor, selecione uma imagem válida!');
+                return;
+            }
+
             const reader = new FileReader();
+            const imagePreview = document.getElementById('imagePreview');
+            const previewImage = document.getElementById('previewImage');
 
-            reader.onload = function (e) {
-                const imagePreview = document.getElementById('imagePreview');
-                const previewImage = document.getElementById('previewImage');
+            reader.onload = function(e) {
                 previewImage.src = e.target.result;
-                imagePreview.style.display = 'block'; // Exibe a pré-visualização
-            }
+                imagePreview.style.display = 'block';
+                
+                // Adjust global container margin to account for preview
+                const global = document.getElementById('global');
+                global.style.marginBottom = '200px';
+            };
 
-            if (file) {
-                reader.readAsDataURL(file); // Lê o arquivo de imagem
-            }
+            reader.onerror = function() {
+                alert('Erro ao carregar a imagem. Por favor, tente novamente.');
+            };
+
+            reader.readAsDataURL(file);
         }
 
         document.addEventListener('DOMContentLoaded', function () {
@@ -219,26 +238,18 @@
 
 
         function autoResize(textarea) {
-            // Reseta a altura para calcular a nova altura
+            // Reset height to calculate new height
             textarea.style.height = 'auto';
-
-            // Garante que o conteúdo do textarea não ultrapasse o limite e ajusta a altura
+            
+            // Calculate the required height
+            const maxHeight = 120; // Maximum height in pixels
             const scrollHeight = textarea.scrollHeight;
-
-
-            // Ajusta a altura com base no conteúdo, adicionando um pequeno espaçamento para evitar corte de texto
-            textarea.style.height = (scrollHeight + 2) + 'px';
-
-            console.log(global.style.marginBottom);
-            console.log(textarea.style.marginBottom);
-            textarea.addEventListener('blur', function () {
-                if (this.value.trim() === "") {
-                    this.style.height = "50px";  // Ajusta para 50px se estiver vazio
-                    const global = document.getElementById('global');
-                    const height = parseInt(window.getComputedStyle(textarea).height);
-                    global.style.marginBottom = height - 50 + 'px';
-                }
-            });
+            
+            // Set the height, not exceeding maxHeight
+            textarea.style.height = Math.min(scrollHeight, maxHeight) + 'px';
+            
+            // Only show scrollbar when at max height
+            textarea.style.overflowY = scrollHeight > maxHeight ? 'auto' : 'hidden';
         }
 
         const socket = io(); // Conecta ao servidor WebSocket
@@ -265,9 +276,9 @@
                     li.innerHTML = `
     ${isFirstMessageFromUser ? `
         <div class="message my-message" style="display: flex; margin: 0px; flex-direction: column;">      
-            ${msg.imageUrl ? `<img class="greenImg" src="${msg.imageUrl}" alt="Image" style="max-width: 100%; margin-bottom: 10px; margin-left: 50px; margin-right: 40px;" />` : ''}
+            ${msg.imageUrl ? `<img class="blackImg" src="${msg.imageUrl}" alt="Image" style="max-width: 100%; margin-bottom: 10px; margin-left: 20px; margin-right: 20px;" />` : ''}
             <div style="display: flex; justify-content: right">
-            <div class="content" style="text-align: left; margin-left: 50px;">
+            <div class="content" style="text-align: left; margin-left: 20px;">
                 <p>${msg.texto}</p>
                 <code>${msg.created}</code>
             </div>
@@ -276,9 +287,9 @@
             </div>
         </div>` : `
         <div class="message my-message" style="display: flex; margin: 0px; flex-direction: column"> 
-            ${msg.imageUrl ? `<img class="greenImg" src="${msg.imageUrl}" alt="Image" style="max-width: 100%; margin-bottom: 10px; margin-left: 50px; margin-right: 40px;" />` : ''}
+            ${msg.imageUrl ? `<img class="blackImg" src="${msg.imageUrl}" alt="Image" style="max-width: 100%; margin-bottom: 10px; margin-left: 50px; margin-right: 40px;" />` : ''}
             <div style="display: flex; justify-content: right">
-            <div class="content" style="text-align: left; margin-left: 50px;">
+            <div class="content" style="text-align: left; margin-left: 20px;">
                 <p>${msg.texto}</p>
                 <code>${msg.created}</code>
             </div>
@@ -298,7 +309,7 @@
             <div class="perfil-wrapper">
                 <div class="perfil" style="border: 1px solid black; width: 35px; height: 35px; background-image: url(${msg.foto}); background-size: cover; background-position: center;"></div>
             </div>
-            <div class="content" style="max-width: 80%; margin-right: 50px">
+            <div class="content" style="max-width: 80%; margin-right: 20px">
                 <strong>${msg.usuario}</strong>
                 <p>${msg.texto}</p>
                 <code>${msg.created}</code>
@@ -309,7 +320,7 @@
             <div class="perfil-wrapper" style="${msg.imageUrl ? "opacity: 1;" : "opacity: 0"}">
                 <div class="perfil" style="border: 1px solid black; width: 35px; height: 35px; background-image: url(${msg.foto}); background-size: cover; background-position: center;"></div>
             </div>
-            <div class="content" style="margin-right: 50px;">
+            <div class="content" style="margin-right: 20px;">
                 <p>${msg.texto}</p>
                 <code>${msg.created}</code>
             </div>
@@ -372,6 +383,8 @@
             try {
                 input.value = ''; // Limpa o campo de texto
                 imageInput.value = ''; // Limpa o campo de imagem (se houver)
+                document.getElementById('imagePreview').style.display = 'none'; // Esconde o preview
+                document.getElementById('global').style.marginBottom = '0'; // Reseta a margem
                 const response = await fetch('/api/messages', {
                     method: 'POST',
                     body: formData, // Envia o FormData
@@ -407,24 +420,23 @@
 </head>
 
 <body>
-    <div class="right-path">
-    <div id="global">
-        <ul id="messages" style="margin-bottom: 70px; ">
+    <div id="global" style="height: calc(100vh - 72px); overflow-y: auto; -webkit-overflow-scrolling: touch;">
+        <ul id="messages" style="margin: 0; padding: 8px; padding-bottom: 80px;">
             <!-- As mensagens serão carregadas aqui dinamicamente -->
         </ul>
     </div>
-    <div id="imagePreview" style="margin-top: 10px; display: none;">
+    <div id="imagePreview" style="position: fixed; bottom: 72px; left: 0; right: 0; background: #1e1e1e; padding: 10px; display: none; border-top: 1px solid #333; z-index: 10; max-height: 200px; overflow: auto;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+            <span style="color: #fff; font-size: 14px;">Pré-visualização</span>
+            <button onclick="document.getElementById('imagePreview').style.display='none'; document.getElementById('imageInput').value='';" style="background: none; border: none; color: #fff; cursor: pointer;">×</button>
+        </div>
         <img id="previewImage" src="" alt="Pré-visualização da imagem"
-            style="min-height: 100px; max-width: 100%;border-radius: 8px; padding-left: 10px; padding-right: 10px;" />
+            style="max-height: 180px; max-width: 100%; border-radius: 8px; display: block; margin: 0 auto; background-color: #2d2d2d; border: 5px solid rgba(0, 0, 0, 0.1);" />
     </div>
-    <form id="messageForm" onsubmit="sendMessage(event)"
-        style="background-color: rgb(24, 24, 24); display: flex; align-items: center; gap: 10px; padding: 10px; position: fixed; bottom: 0px; flex-direction: column;">
-
-        <div
-            style=" background-color: rgb(24, 24, 24); display: flex; align-items: center; gap: 10px; padding: 10px; position: fixed; bottom: 0px; width: 100%;">
-            <!-- Área de texto expandível -->
+    <form id="messageForm" onsubmit="sendMessage(event)" style="position: fixed; bottom: 0; left: 0; right: 0; z-index: 20;">
+        <div style="display: flex; align-items: center; gap: 8px; padding: 12px 16px; width: 100%; box-sizing: border-box;">
             <button type="button" onclick="document.getElementById('imageInput').click()"
-                style=" padding: 10px; color: white; border: none; border-radius: 50%; width: 50px; height: 50px; display: flex; align-items: center; justify-content: center; font-size: 18px; cursor: pointer;">
+                style="background: none; border: none; padding: 8px; color: #9e9e9e; border-radius: 50%; width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; cursor: pointer;">
                 <svg width="64px" height="64px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
                     <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g>
@@ -450,8 +462,11 @@
             <input type="file" id="imageInput" accept="image/*" style="display: none;" />
             <!-- Botão de enviar -->
             <button id="messageButton" type="submit"
-                style="color: white; border: none; border-radius: 50%; width: 50px; height: 50px; display: flex; align-items: center; justify-content: center; font-size: 18px; cursor: pointer;">
-                &#10148; <!-- Ícone de envio -->
+                style="background-color: #1a73e8; color: white; border: none; border-radius: 50%; width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: background-color 0.2s;">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                    <path d="M22 2L11 13" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                    <path d="M22 2L15 22L11 13L2 9L22 2Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
             </button>
         </div>
     </form>

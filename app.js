@@ -6,8 +6,9 @@ const User = require('./models/user.js');
 const moment = require('moment-timezone');
 const http = require('http');
 const { Server } = require('socket.io');
+const path = require('path');
 
-let CurrentUser = 0;
+let CurrentUser = null;
 
 dotenv.config();
 const { v2: cloudinary } = require('cloudinary');
@@ -53,9 +54,11 @@ const notifyClients = () => {
 };
 
 app.set('view engine', 'ejs');
+app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.urlencoded({ extended: true })); // Para processar dados de formulários
 // Middleware para interpretar JSON
 app.use(express.json());
+
 
 const connectDB = async () => {
     try {
@@ -146,8 +149,9 @@ app.post('/api/login', async (req, res) => {
         console.log(user);
         console.log(number);
         if (user) {
+            CurrentUser = user;
             // Número válido, retorna sucesso
-            res.render('chat', { user: user});
+            res.redirect('/home')
         } else {
             res.redirect('/register');
             // Número não encontrado, requer registro
@@ -158,6 +162,16 @@ app.post('/api/login', async (req, res) => {
     }
 });
 
+app.get('/home', async (req, res) => {
+    if (CurrentUser){
+        let user = CurrentUser
+        let users = await User.find({});
+        console.log(users);
+        res.render('chat', {user:user, users:users});
+    } else {
+        res.redirect('/login')
+    }
+});
 
 app.post('/api/messages', upload.single('image'), async (req, res) => {
     const { usuario, texto } = req.body;
@@ -167,23 +181,56 @@ app.post('/api/messages', upload.single('image'), async (req, res) => {
     let imageUrl = null;
 
     if (req.file) {
-        imageUrl = req.file.path; // URL da imagem no Cloudinary
+        imageUrl = req.file.path;
     }
 
+    // Verifica se é um comando /dado
+    if (texto?.startsWith('/dado')) {
+        const lista = texto
+            .replace('/dado', '')
+            .split(',')
+            .map(n => n.trim())
+            .filter(n => n.length > 0);
+
+        if (lista.length === 0) {
+            return res.status(400).json({ error: 'Nenhum nome informado no comando /dado.' });
+        }
+
+        // Monta a mensagem única com quebra de linha
+        const linhas = lista.map(nome => {
+            const numero = Math.floor(Math.random() * 21);
+            return `${nome} tirou ${numero} no dado 🎲`;
+        });
+
+        const textoFinal = linhas.join('\n');
+
+        const dadoMessage = new Message({
+            usuario: 'Dado',
+            texto: textoFinal,
+            foto: 'https://i.pinimg.com/736x/ee/51/73/ee5173dd81b2abc23de6df5a5b671548.jpg',
+            created,
+            imageUrl: null
+        });
+
+        await dadoMessage.save();
+        notifyClients();
+
+        return res.status(201).json(dadoMessage);
+    }
+
+    // Caso seja uma mensagem comum
     try {
-        // Cria e salva a nova mensagem
         const newMessage = new Message({
             usuario,
             texto,
             foto,
             created,
-            imageUrl // Salva a URL da imagem, se houver
+            imageUrl
         });
 
         await newMessage.save();
         console.log('Mensagem salva:', newMessage);
 
-        // Notifica os clientes conectados
         notifyClients();
         res.status(201).json(newMessage);
     } catch (err) {
@@ -191,6 +238,8 @@ app.post('/api/messages', upload.single('image'), async (req, res) => {
         res.status(500).json({ error: 'Erro ao salvar mensagem' });
     }
 });
+
+
 
 
 

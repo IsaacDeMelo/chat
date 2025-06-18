@@ -240,9 +240,6 @@ app.post('/api/messages', upload.single('image'), async (req, res) => {
 });
 
 
-
-
-
 app.get('/api/messages', async (req, res) => {
     try {
         const messages = await Message.find();

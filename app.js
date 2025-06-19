@@ -185,38 +185,37 @@ app.post('/api/messages', upload.single('image'), async (req, res) => {
     }
 
     // Verifica se é um comando /dado
-    if (texto?.startsWith('/dado')) {
-        const lista = texto
-            .replace('/dado', '')
-            .split(',')
-            .map(n => n.trim())
-            .filter(n => n.length > 0);
+    if (/^\/dado/i.test(texto)) {
+    const nomesBrutos = texto.replace(/^\/dado\s*/i, ''); // remove "/dado" + espaços iniciais
+    const lista = nomesBrutos
+        .split(',')
+        .map(n => n.trim())
+        .filter(n => n.length > 0);
 
-        if (lista.length === 0) {
-            return res.status(400).json({ error: 'Nenhum nome informado no comando /dado.' });
-        }
-
-        // Monta a mensagem única com quebra de linha
-        const linhas = lista.map(nome => {
-            const numero = Math.floor(Math.random() * 21);
-            return `${nome} tirou ${numero} no dado 🎲`;
-        });
-
-        const textoFinal = linhas.join('\n');
-
-        const dadoMessage = new Message({
-            usuario: 'Dado',
-            texto: textoFinal,
-            foto: 'https://i.pinimg.com/736x/ee/51/73/ee5173dd81b2abc23de6df5a5b671548.jpg',
-            created,
-            imageUrl: null
-        });
-
-        await dadoMessage.save();
-        notifyClients();
-
-        return res.status(201).json(dadoMessage);
+    if (lista.length === 0) {
+        return res.status(400).json({ error: 'Nenhum nome informado no comando /dado.' });
     }
+
+    const linhas = lista.map(nome => {
+        const numero = Math.floor(Math.random() * 21);
+        return `${nome} tirou ${numero} no dado 🎲`;
+    });
+
+    const textoFinal = linhas.join('\n');
+
+    const dadoMessage = new Message({
+        usuario: 'Dado',
+        texto: textoFinal,
+        foto: 'https://i.pinimg.com/736x/ee/51/73/ee5173dd81b2abc23de6df5a5b671548.jpg',
+        created,
+        imageUrl: null
+    });
+
+    await dadoMessage.save();
+    notifyClients();
+
+    return res.status(201).json(dadoMessage);
+}
 
     // Caso seja uma mensagem comum
     try {

@@ -25,6 +25,19 @@
             max-width: 80%;
         }
 
+        .mention {
+            color: #888;
+            /* cor padrão pra todos */
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .mention.highlighted {
+            color: red;
+            /* cor forte só para o mencionado */
+        }
+
+
         .message.my-message {
             align-items: flex-end;
             margin-left: 20%;
@@ -41,7 +54,7 @@
             background-color: #2d2d2d;
             color: #ffffff;
             word-break: break-word;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
             line-height: 1.4;
             position: relative;
             box-sizing: border-box;
@@ -94,7 +107,7 @@
 
         .message-time {
             font-size: 11px;
-            color: rgba(255,255,255,0.6);
+            color: rgba(255, 255, 255, 0.6);
             margin-top: 4px;
             text-align: right;
         }
@@ -146,7 +159,7 @@
             gap: 8px;
             padding: 12px 16px;
             background-color: #1e1e1e;
-            box-shadow: 0 -1px 3px rgba(0,0,0,0.3);
+            box-shadow: 0 -1px 3px rgba(0, 0, 0, 0.3);
             width: 100%;
             box-sizing: border-box;
         }
@@ -163,7 +176,7 @@
             min-height: 48px;
             max-height: 120px;
             resize: none;
-            box-shadow: inset 0 1px 2px rgba(0,0,0,0.2);
+            box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.2);
             transition: height 0.2s ease;
             overflow-y: hidden;
         }
@@ -202,6 +215,25 @@
             transform: scale(1.1);
         }
 
+        .guide {
+            display: none;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            position: fixed;
+            opacity: 0;
+            transition: 0.5s all linear;
+            top: 0;
+            background: #2d2d2d;
+            padding: 20px;
+            width: 100%;
+            height: 100%;
+            z-index: 30;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+
+        }
+
+
         @media (min-width: 500px) {
             #messageForm {
 
@@ -233,11 +265,26 @@
 
 
         }
-    
+
+        .tab-btn {
+            background-color: #1a73e8;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background-color 0.3s;
+        }
+
+        .tab-btn:hover {
+            background-color: #2a91ff;
+        }
     </style>
     <script src="/socket.io/socket.io.js"></script>
 
     <script defer>
+        var User;
         function previewImage(event) {
             const file = event.target.files[0];
             if (!file) return;
@@ -252,16 +299,16 @@
             const imagePreview = document.getElementById('imagePreview');
             const previewImage = document.getElementById('previewImage');
 
-            reader.onload = function(e) {
+            reader.onload = function (e) {
                 previewImage.src = e.target.result;
                 imagePreview.style.display = 'block';
-                
+
                 // Adjust global container margin to account for preview
                 const global = document.getElementById('global');
                 global.style.marginBottom = '200px';
             };
 
-            reader.onerror = function() {
+            reader.onerror = function () {
                 alert('Erro ao carregar a imagem. Por favor, tente novamente.');
             };
 
@@ -269,6 +316,7 @@
         }
 
         document.addEventListener('DOMContentLoaded', function () {
+            User = document.getElementById('self').dataset.user;
             const imageInput = document.getElementById('imageInput');
             imageInput.addEventListener('change', previewImage);  // Usando eventListener
 
@@ -285,14 +333,14 @@
         function autoResize(textarea) {
             // Reset height to calculate new height
             textarea.style.height = 'auto';
-            
+
             // Calculate the required height
             const maxHeight = 120; // Maximum height in pixels
             const scrollHeight = textarea.scrollHeight;
-            
+
             // Set the height, not exceeding maxHeight
             textarea.style.height = Math.min(scrollHeight, maxHeight) + 'px';
-            
+
             // Only show scrollbar when at max height
             textarea.style.overflowY = scrollHeight > maxHeight ? 'auto' : 'hidden';
         }
@@ -314,7 +362,7 @@
                 li.style.marginTop = isFirstMessageFromUser ? '0px' : '0px';
                 li.style.marginBottom = isFirstMessageFromUser ? '0px' : '0px';
                 li.style.paddingTop = isFirstMessageFromUser ? '0px' : '0px';
-                li.style.paddingBottom = isFirstMessageFromUser ? '0px' : '5px'; 
+                li.style.paddingBottom = isFirstMessageFromUser ? '0px' : '5px';
                 const marginTop = isFirstMessageFromUser ? '10px' : '0px'; // Menor espaçamento para mensagens subsequentes
 
                 if (isUserMessage) {
@@ -383,18 +431,18 @@
 
 
         document.addEventListener('DOMContentLoaded', function () {
-        // Sidebar toggle functionality
-        document.getElementById('sidebarToggle').addEventListener('click', function() {
-            document.getElementById('sidebar').style.left = '0';
-        });
+            // Sidebar toggle functionality
+            document.getElementById('sidebarToggle').addEventListener('click', function () {
+                document.getElementById('sidebar').style.left = '0';
+            });
 
-        document.getElementById('closeSidebar').addEventListener('click', function() {
-            document.getElementById('sidebar').style.left = '-300px';
-        });
-    })
+            document.getElementById('closeSidebar').addEventListener('click', function () {
+                document.getElementById('sidebar').style.left = '-300px';
+            });
+        })
 
         // Close sidebar when clicking outside
-        document.addEventListener('click', function(event) {
+        document.addEventListener('click', function (event) {
             const sidebar = document.getElementById('sidebar');
             const toggleBtn = document.getElementById('sidebarToggle');
             if (!sidebar.contains(event.target) && event.target !== toggleBtn && sidebar.style.left === '0px') {
@@ -402,30 +450,41 @@
             }
         });
         function formatMessageText(text) {
-            // First replace newlines with <br> tags
             text = text.replace(/\n/g, '<br>');
-            // Then replace formatting markers with HTML tags
-            text = text.replace(/\*(.*?)\*/g, '<strong>$1</strong>'); // Bold
-            text = text.replace(/_([^_]+)_/g, '<em>$1</em>'); // Italic
-            text = text.replace(/-(.*?)-/g, '<u>$1</u>'); // Underline
-            text = text.replace(/\(&quot;(.*?)&quot;\)/g, '<q>$1</q>'); // Quotes
-            text = text.replace(/\(([^)]+)\)/g, '<q>$1</q>'); // Parentheses quotes
-            text = text.replace(/\[(.*?)\]/g, '<span style="color: #ff9800;">$1</span>'); // Technique/emphasis
-            text = text.replace(/~(.*?)~/g, '<span style="color: #4caf50; background: #4caf5020; padding: 0 4px; border-radius: 3px;">$1</span>'); // Spoiler
+
+            text = text.replace(/\*(.*?)\*/g, '<strong>$1</strong>');
+            text = text.replace(/_([^_]+)_/g, '<em>$1</em>');
+            text = text.replace(/-(.*?)-/g, '<u>$1</u>');
+            text = text.replace(/\(&quot;(.*?)&quot;\)/g, '<q>$1</q>');
+            text = text.replace(/\(([^)]+)\)/g, '<q>$1</q>');
+            text.replace(/\[(.*?)\]/g, '<span style="color: #ff9800;">$1</span>');
+            text = text.replace(/~(.*?)~/g, '<span style="color: #4caf50; background: #4caf5020; padding: 0 4px; border-radius: 3px;">$1</span>');
+
+            // Menções com @Nome@ (pode ter espaços)
+            text = text.replace(/@([^@]+)@/g, (match, mentioned) => {
+                if (mentioned.trim().toLowerCase() === User.toLowerCase()) {
+                    return `<span style="color: #1a73e8; font-weight: bold; border-radius: 5px; padding: 1px; background-color: #1a73e820; ;">@${mentioned}@</span>`;
+                } else {
+                    return match;
+                }
+            });
+
             return text;
         }
+
+
 
         async function sendMessage(event) {
             event.preventDefault();
             const input = document.getElementById('messageInput');
             let messageText = input.value.trim();
-            
+
             // Apply formatting if not empty
             if (messageText) {
                 messageText = formatMessageText(messageText);
             }
             const messageButton = document.getElementById('messageButton');
-            messageButton.disabled = true; 
+            messageButton.disabled = true;
             const usuario = "<%= user.username %>";
             const texto = input.value; // Don't trim to preserve newlines
             const imageInput = document.getElementById('imageInput');  // Referência ao input de imagem
@@ -478,7 +537,26 @@
             }
         }
 
+        function showGuide() {
+            document.getElementById('formattingGuideModal').style.display = 'flex'
+            setTimeout(() => {
+                document.getElementById('formattingGuideModal').style.opacity = '1'
+            }, 100);
+        }
+        function ocultGuide() {
+            document.getElementById('formattingGuideModal').style.opacity = '0'
+            setTimeout(() => {
+                document.getElementById('formattingGuideModal').style.display = 'none'
 
+            }, 500);
+        }
+        function showTab(tabId) {
+            const allTabs = document.querySelectorAll('.tab-content');
+            allTabs.forEach(tab => tab.style.display = 'none');
+
+            const selectedTab = document.getElementById(`tab-${tabId}`);
+            if (selectedTab) selectedTab.style.display = 'block';
+        }
 
 
     </script>
@@ -486,50 +564,106 @@
 </head>
 
 <body>
-    <div id="chatHeader" style="position: fixed; top: 0; left: 0; right: 0; height: 72px; background-color: #1e1e1e; display: flex; align-items: center; padding: 0 16px; border-bottom: 1px solid #333; z-index: 10;">
+    <div id="chatHeader"
+        style="position: fixed; top: 0; left: 0; right: 0; height: 72px; background-color: #1e1e1e; display: flex; align-items: center; padding: 0 16px; border-bottom: 1px solid #333; z-index: 10;">
         <div style="display: flex; align-items: center; gap: 12px; width: 100%;">
-            <img id="chatProfile" src="https://i.pinimg.com/736x/ee/51/73/ee5173dd81b2abc23de6df5a5b671548.jpg" style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover;">
+            <img id="chatProfile" src="https://i.pinimg.com/736x/ee/51/73/ee5173dd81b2abc23de6df5a5b671548.jpg"
+                style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover;">
             <div style="flex: 1;">
                 <h3 style="margin: 0; color: #fff; font-size: 16px;">Grupo RPG</h3>
                 <p style="margin: 0; color: #9e9e9e; font-size: 12px;">Lyonel Pesyac.</p>
             </div>
-            <button id="sidebarToggle" style="background: none; border: none; color: #fff; font-size: 20px; cursor: pointer;">☰</button>
+            <button id="sidebarToggle"
+                style="background: none; border: none; color: #fff; font-size: 20px; cursor: pointer;">☰</button>
         </div>
     </div>
-    <div id="global" style="padding-top: 144px; margin-bottom: 20px; padding-bottom: 20px; overflow-y: auto; -webkit-overflow-scrolling: touch;">
+    <div id="global"
+        style="padding-top: 144px; margin-bottom: 20px; padding-bottom: 20px; overflow-y: auto; -webkit-overflow-scrolling: touch;">
         <ul id="messages" style="margin: 0; padding: 8px; padding-bottom: 80px;">
             <!-- As mensagens serão carregadas aqui dinamicamente em -->
-        </ul> 
+        </ul>
     </div>
-    <div id="imagePreview" style="position: fixed; bottom: 72px; left: 0; right: 0; background: #1e1e1e; padding: 16px; display: none; border-top: 1px solid #333; z-index: 10; max-height: 200px; overflow: auto; border-radius: 12px 12px 0 0;">
+    <div id="imagePreview"
+        style="position: fixed; bottom: 72px; left: 0; right: 0; background: #1e1e1e; padding: 16px; display: none; border-top: 1px solid #333; z-index: 10; max-height: 200px; overflow: auto; border-radius: 12px 12px 0 0;">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
             <span style="color: #fff; font-size: 14px;">Pré-visualização</span>
-            <button onclick="document.getElementById('imagePreview').style.display='none'; document.getElementById('imageInput').value='';" style="background: none; border: none; color: #fff; cursor: pointer;">×</button>
+            <button
+                onclick="document.getElementById('imagePreview').style.display='none'; document.getElementById('imageInput').value='';"
+                style="background: none; border: none; color: #fff; cursor: pointer;">×</button>
         </div>
         <img id="previewImage" src="" alt="Pré-visualização da imagem"
             style="max-height: 180px; max-width: 100%; border-radius: 8px; display: block; margin: 0 auto; background-color: #2d2d2d; border: 5px solid rgba(0, 0, 0, 0.1);" />
     </div>
-    <div id="formattingGuideModal" style="display: none; justify-content: center; align-items: center; flex-direction: column; position: fixed; top: 80px; left: 50%; transform: translateX(-50%); background: #2d2d2d; padding: 20px; border-radius: 10px; max-width: 90%; width: 400px; z-index: 30; box-shadow: 0 4px 12px rgba(0,0,0,0.3);">
-        <h3 style="margin-top: 0; color: #1a73e8;">Guia de Formatação</h3>
-        <ul style="text-align: center;">
-            <li><strong>**negrito**</strong> → <strong>negrito</strong></li>
-            <li><em>__itálico__</em> → <em>itálico</em></li>
-            <li><q>("citação")</q> → <q>citação</q></li>
-            <li><span style="color: #ff9800;">[técnica]</span> → <span style="color: #ff9800;">técnica</span></li>
-            <li><span style="text-decoration: underline;">_sublinhado_</span> → <span style="text-decoration: underline;">sublinhado</span></li>
-            <li><span style="color: #4caf50;">~spoiler~</span> → <span style="color: #4caf50; background: #4caf5020; padding: 0 4px; border-radius: 3px;">spoiler</span></li>
-        </ul>
-        <button onclick="document.getElementById('formattingGuideModal').style.display='none'" style="background: #1a73e8; color: white; border: none; padding: 8px 16px; border-radius: 5px; margin-top: 10px; cursor: pointer;">Fechar</button>
+    <div id="formattingGuideModal" class="guide">
+        <img src="https://media.tenor.com/S7E33qGuPkYAAAAi/hikari-shupogaki.gif" style="margin: 5px; border: 1px solid #1a73e8; width: 40%; border-radius: 50%;"> 
+        <div style="max-width: 400px; width: 90%; background: #2d2d2d; border-radius: 12px; padding: 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.3);">
+            <h3 style="margin: 0 0 20px; color: #1a73e8; text-align: center; font-size: 20px;">Guia de Formatação</h3>
+
+            <!-- NAVBAR -->
+            <div style="display: flex; justify-content: center; gap: 8px; margin-bottom: 20px;">
+                <button class="tab-btn" onclick="showTab('formatacao')" style="background: #333; color: #ccc; border: none; padding: 8px 16px; border-radius: 20px; cursor: pointer; transition: all 0.2s; font-size: 14px;">Formatação</button>
+                <button class="tab-btn" onclick="showTab('comandos')" style="background: #333; color: #ccc; border: none; padding: 8px 16px; border-radius: 20px; cursor: pointer; transition: all 0.2s; font-size: 14px;">Comandos</button>
+            </div>
+
+            <!-- ABA: FORMATAÇÃO -->
+            <div class="tab-content" id="tab-formatacao">
+                <ul style="margin: 0; padding: 0; list-style: none; display: grid; grid-template-columns: 1fr; gap: 12px;">
+                    <li style="display: flex; align-items: center; justify-content: space-between; padding: 10px; background: #333; border-radius: 8px;">
+                        <span style="color: #ccc;"><code>*negrito*</code></span> 
+                        <span style="color: #fff; font-weight: bold;"><code>→ negrito</code></span>
+                    </li>
+                    <li style="display: flex; align-items: center; justify-content: space-between; padding: 10px; background: #333; border-radius: 8px;">
+                        <span style="color: #ccc;"><code>_itálico_</code></span> 
+                        <span style="color: #fff; font-style: italic;"><code>→ itálico</code></span>
+                    </li>
+                    <li style="display: flex; align-items: center; justify-content: space-between; padding: 10px; background: #333; border-radius: 8px;">
+                        <span style="color: #ccc;"><code>_sublinhado_</code></span>
+                        <span style="color: #fff; text-decoration: underline;"><code>→ sublinhado</code></span>
+                    </li>
+                    <li style="display: flex; align-items: center; justify-content: space-between; padding: 10px; background: #333; border-radius: 8px;">
+                        <span style="color: #ccc;"><code>~spoiler~</code></span>
+                        <span style="color: #4caf50; background: rgba(76, 175, 80, 0.1); padding: 2px 6px; border-radius: 4px;"><code>→ spoiler</code></span>
+                    </li>
+                </ul>
+            </div>
+
+            <!-- ABA: COMANDOS -->
+            <div class="tab-content" id="tab-comandos" style="display: none;">
+                <ul style="margin: 0; padding: 0; list-style: none; display: grid; grid-template-columns: 1fr; gap: 12px;">
+                    <li style="padding: 12px; background: #333; border-radius: 8px;">
+                        <code style="display: block; color: #1a73e8; margin-bottom: 4px; font-size: 14px;">/dado Jogador, Inimigo</code>
+                        <span style="color: #ccc; font-size: 13px;">Rola um dado para cada nome, podem ser aliados, inimigos.. etc. Pode ser feito individualmente também.</span>
+                    </li>
+                    <li style="padding: 12px; background: #333; border-radius: 8px;">
+                        <code style="display: block; color: #1a73e8; margin-bottom: 4px; font-size: 14px;">@nome de alguém@</code>
+                        <span style="color: #ccc; font-size: 13px;">Destaca uma mensagem para alguém em específico</span>
+                    </li>
+                </ul>
+            </div>
+
+            <!-- Botão fechar -->
+            <button onclick="ocultGuide()"
+                style="background: #1a73e8; color: white; border: none; padding: 10px 20px; border-radius: 20px; margin-top: 20px; cursor: pointer; width: 100%; font-weight: bold; transition: background 0.2s;">Fechar</button>
+        </div>
     </div>
 
-    <form id="messageForm" onsubmit="sendMessage(event)" style="position: fixed; bottom: 0; left: 0; right: 0; z-index: 20;">
-        <div style="display: flex; align-items: center; gap: 4px; padding: 12px 10px; width: 100%; box-sizing: border-box;">
-            <button type="button" onclick="document.getElementById('formattingGuideModal').style.display='flex'" style="position: fixed; right: 20px; top: 100px; background: #2d2d2d; border: none; padding: 8px; color: #9e9e9e; border-radius: 50%; width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 2px 5px rgba(0,0,0,0.2); z-index: 25;">
+
+    <form id="messageForm" onsubmit="sendMessage(event)"
+        style="position: fixed; bottom: 0; left: 0; right: 0; z-index: 20;">
+        <div
+            style="display: flex; align-items: center; gap: 4px; padding: 12px 10px; width: 100%; box-sizing: border-box;">
+            <button type="button" onclick="showGuide()"
+                style="position: fixed; right: 20px; top: 100px; background: #2d2d2d; border: none; padding: 8px; color: #9e9e9e; border-radius: 50%; width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 2px 5px rgba(0,0,0,0.2); z-index: 25;">
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                    <path d="M8 14C8 14 9.5 16 12 16C14.5 16 16 14 16 14" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                    <path d="M9 9H9.01" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                    <path d="M15 9H15.01" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path
+                        d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                    <path d="M8 14C8 14 9.5 16 12 16C14.5 16 16 14 16 14" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round" />
+                    <path d="M9 9H9.01" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round" />
+                    <path d="M15 9H15.01" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round" />
                 </svg>
             </button>
             <button type="button" onclick="document.getElementById('imageInput').click()"
@@ -561,40 +695,51 @@
             <button id="messageButton" type="submit"
                 style="background-color: #1a73e8; color: white; border: none; border-radius: 50%; width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: background-color 0.2s;">
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                    <path d="M22 2L11 13" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-                    <path d="M22 2L15 22L11 13L2 9L22 2Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M22 2L11 13" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+                    <path d="M22 2L15 22L11 13L2 9L22 2Z" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round" />
                 </svg>
             </button>
         </div>
     </form>
-    
-</div>
-</div>
-<div id="sidebar" style="position: fixed; top: 0; left: -300px; width: 300px; height: 100vh; background-color: #1e1e1e; z-index: 30; transition: left 0.3s; overflow-y: auto; border-right: 1px solid #333;">
+
+    </div>
+    </div>
+    <div id="sidebar"
+        style="position: fixed; top: 0; left: -300px; width: 300px; height: 100vh; background-color: #1e1e1e; z-index: 30; transition: left 0.3s; overflow-y: auto; border-right: 1px solid #333;">
         <div style="padding: 16px; border-bottom: 1px solid #333;">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
                 <h3 style="margin: 0; color: #fff;">Membros do Grupo</h3>
-                <button id="closeSidebar" style="background: none; border: none; color: #fff; font-size: 20px; cursor: pointer;">×</button>
+                <button id="closeSidebar"
+                    style="background: none; border: none; color: #fff; font-size: 20px; cursor: pointer;">×</button>
             </div>
             <div id="membersList" style="display: flex; flex-direction: column; gap: 8px;">
-                <% users.forEach(element => {%>
-                    <div style="display: flex; align-items: center; gap: 12px; padding: 8px; border-radius: 8px; background-color: #2d2d2d;">
-                        <img src="<%=element.perfil%>" style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover;">
+                <% users.forEach(element=> {%>
+                    <div
+                        style="display: flex; align-items: center; gap: 12px; padding: 8px; border-radius: 8px; background-color: #2d2d2d;">
+                        <img src="<%=element.perfil%>"
+                            style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover;">
                         <div>
-                            <% if (user.username == element.username) { %>
-                            <p style="margin: 0; color: #fff;">(Você) <%=element.username%></p>
-                            <% } else {%>
-                            <p style="margin: 0; color: #fff;"><%=element.username%></p>
-                            <%}%>
+                            <% if (user.username==element.username) { %>
+                                <p id="self" style="margin: 0; color: #fff;" data-user="<%=element.username%>">(Você)
+                                    <%=element.username%>
+                                </p>
+                                <% } else {%>
+                                    <p style="margin: 0; color: #fff;">
+                                        <%=element.username%>
+                                    </p>
+                                    <%}%>
 
-                            <p style="margin: 0; color: #9e9e9e; font-size: 12px;"><%=element.number%></p>
+                                        <p style="margin: 0; color: #9e9e9e; font-size: 12px;">
+                                            <%=element.number%>
+                                        </p>
                         </div>
-                    </div> 
-                <%});%>
+                    </div>
+                    <%});%>
             </div>
         </div>
     </div>
-</div>
+    </div>
 </body>
 
 </html> guidemodal

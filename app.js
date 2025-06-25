@@ -38,7 +38,16 @@ const io = new Server(server); // Adiciona o WebSocket ao servidor
 // Conexão WebSocket
 io.on('connection', (socket) => {
     console.log('Novo cliente conectado');
-
+    
+    socket.on('requestMessages', () => {
+        Message.find()
+            .then((messages) => {
+                socket.emit('updateMessages', messages);
+            })
+            .catch((err) => {
+                console.error('Erro ao buscar mensagens:', err);
+            });
+    });
     // Escuta por desconexões
     socket.on('disconnect', () => {
         console.log('Cliente desconectado');

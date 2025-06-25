@@ -230,9 +230,76 @@
             height: 100%;
             z-index: 30;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-
         }
 
+        .config {
+            display: none;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            position: fixed;
+            opacity: 0;
+            transition: 0.5s all linear;
+            top: 0;
+            background: #2d2d2d;
+            padding: 20px;
+            width: 100%;
+            height: 100%;
+            z-index: 30;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        }
+
+        .switch {
+            display: flex;
+            width: 100%; height: 100%;
+            align-items: center;
+            gap: 10px;
+            padding: 10px;
+            cursor: pointer;
+            justify-content: space-between;
+            user-select: none;
+        }
+
+        .switch input {
+            display: none;
+        }
+
+        .slider {
+            width: 50px;
+            height: 26px;
+            background-color: #ccc;
+            border-radius: 50px;
+            position: relative;
+            transition: background-color 0.3s ease;
+        }
+
+        .slider::before {
+            content: "";
+            position: absolute;
+            height: 20px;
+            width: 20px;
+            left: 3px;
+            top: 3px;
+            background-color: white;
+            border-radius: 50%;
+            transition: transform 0.3s ease;
+        }
+
+        /* Estilo quando o switch está ligado */
+        input:checked+.slider {
+            background-color: #1a73e8;
+        }
+
+        input:checked+.slider::before {
+            transform: translateX(24px);
+        }
+
+        .switch-label {
+            font-size: 14px;
+        }
+
+
+        .opt {}
 
         @media (min-width: 500px) {
             #messageForm {
@@ -285,6 +352,7 @@
 
     <script defer>
         var User;
+        var messagesBackup;
         function previewImage(event) {
             const file = event.target.files[0];
             if (!file) return;
@@ -347,64 +415,97 @@
 
         const socket = io(); // Conecta ao servidor WebSocket
 
-        socket.on('updateMessages', (messages) => {
-            const messagesList = document.getElementById('messages');
-            messagesList.innerHTML = ''; // Limpa as mensagens antigas
-            let lastUser = ""; // Variável para armazenar o último usuário
 
-            messages.forEach((msg) => {
-                const isUserMessage = msg.usuario === "<%= user.username %>";
-                const isFirstMessageFromUser = msg.usuario !== lastUser; // Verifica se é a primeira mensagem de uma sequência
-
-                const li = document.createElement('li');
-
-                // Aplica a margem maior apenas para a primeira mensagem de uma sequência
-                li.style.marginTop = isFirstMessageFromUser ? '0px' : '0px';
-                li.style.marginBottom = isFirstMessageFromUser ? '0px' : '0px';
-                li.style.paddingTop = isFirstMessageFromUser ? '0px' : '0px';
-                li.style.paddingBottom = isFirstMessageFromUser ? '0px' : '5px';
-                const marginTop = isFirstMessageFromUser ? '10px' : '0px'; // Menor espaçamento para mensagens subsequentes
-
-                if (isUserMessage) {
-                    li.innerHTML = `
-                        <div class="message my-message">
-                            ${msg.imageUrl ? `
-                                <img class="blackImg" src="${msg.imageUrl}" alt="Image" style="max-width: 100%; border-radius: 12px; margin-bottom: 8px;">
-                            ` : ''}
-                            <div class="content">
-                                <p>${formatMessageText(msg.texto)}</p>
-                                <div class="message-time">${msg.created}</div>
-                            </div>
-                            ${isFirstMessageFromUser ? `
-                                <div class="message-header" style="margin-top: 8px;">
-                                    <img class="perfil" src="${msg.foto}" alt="Profile">
-                                </div>
-                            ` : ''}
-                        </div>
-                    `;
-                } else {
-                    li.innerHTML = `
-                        <div class="message other-message">
-                            ${isFirstMessageFromUser ? `
-                                <div class="message-header">
-                                    <img class="perfil" src="${msg.foto}" alt="Profile">
-                                    <strong>${msg.usuario}</strong>
-                                </div>
-                            ` : ''}
-                            ${msg.imageUrl ? `
-                                <img class="blackImg" src="${msg.imageUrl}" alt="Image" style="max-width: 100%; border-radius: 12px; margin-bottom: 8px;">
-                            ` : ''}
-                            <div class="content">
-                                <p>${formatMessageText(msg.texto)}</p>
-                                <div class="message-time">${msg.created}</div>
-                            </div>
-                        </div>
-                    `;
-                }
-                lastUser = msg.usuario; // Atualiza o último usuário
-                messagesList.appendChild(li);
+        let filterMentions = false; // Estado do filtro
+        const currentUser = "<%= user.username %>"; // Nome do usuário atual
+        document.addEventListener('DOMContentLoaded', () => {
+            const toggleFilterBtn = document.getElementById('toggleFilterBtn');
+            toggleFilterBtn.addEventListener('change', () => {
+                filterMentions = toggleFilterBtn.checked;
+                console.log(filterMentions)
+                // Atualiza as mensagens com base no novo filtro
+                socket.emit('requestMessages')
             });
         });
+
+
+        function updateChat(messages) {
+            messagesBackup = messages;
+            const messagesList = document.getElementById('messages');
+            messagesList.innerHTML = '';
+            let lastUser = "";
+            function isUserMentioned(text, user) {
+                const regex = /@([^@]+)@/g;
+                let match;
+                while ((match = regex.exec(text)) !== null) {
+                    if (match[1].trim().toLowerCase() === user.toLowerCase()) {
+                        return true;
+                    }
+                }
+                return false;
+            }
+
+            messages
+                .filter(msg => {
+                    if (!filterMentions) return true;
+                    return msg.usuario === currentUser || isUserMentioned(msg.texto, currentUser);
+                })
+                .forEach((msg) => {
+                    const isUserMessage = msg.usuario === currentUser;
+                    const isFirstMessageFromUser = msg.usuario !== lastUser;
+
+                    const li = document.createElement('li');
+                    li.style.marginTop = isFirstMessageFromUser ? '0px' : '0px';
+                    li.style.marginBottom = isFirstMessageFromUser ? '0px' : '0px';
+                    li.style.paddingTop = isFirstMessageFromUser ? '0px' : '0px';
+                    li.style.paddingBottom = isFirstMessageFromUser ? '0px' : '5px';
+
+                    if (isUserMessage) {
+                        li.innerHTML = `
+                    <div class="message my-message">
+                        ${msg.imageUrl ? `
+                            <img class="blackImg" src="${msg.imageUrl}" alt="Image" style="max-width: 100%; border-radius: 12px; margin-bottom: 8px;">
+                        ` : ''}
+                        <div class="content">
+                            <p>${formatMessageText(msg.texto)}</p>
+                            <div class="message-time">${msg.created}</div>
+                        </div>
+                        ${isFirstMessageFromUser ? `
+                            <div class="message-header" style="margin-top: 8px;">
+                                <img class="perfil" src="${msg.foto}" alt="Profile">
+                            </div>
+                        ` : ''}
+                    </div>
+                `;
+                    } else {
+                        li.innerHTML = `
+                    <div class="message other-message">
+                        ${isFirstMessageFromUser ? `
+                            <div class="message-header">
+                                <img class="perfil" src="${msg.foto}" alt="Profile">
+                                <strong>${msg.usuario}</strong>
+                            </div>
+                        ` : ''}
+                        ${msg.imageUrl ? `
+                            <img class="blackImg" src="${msg.imageUrl}" alt="Image" style="max-width: 100%; border-radius: 12px; margin-bottom: 8px;">
+                        ` : ''}
+                        <div class="content">
+                            <p>${formatMessageText(msg.texto)}</p>
+                            <div class="message-time">${msg.created}</div>
+                        </div>
+                    </div>
+                `;
+                    }
+
+                    lastUser = msg.usuario;
+                    messagesList.appendChild(li);
+                });
+        }
+
+        socket.on('updateMessages', (messages) => {
+            updateChat(messages);
+        });
+
 
         async function loadMessages() {
             try {
@@ -471,8 +572,6 @@
 
             return text;
         }
-
-
 
         async function sendMessage(event) {
             event.preventDefault();
@@ -543,11 +642,22 @@
                 document.getElementById('formattingGuideModal').style.opacity = '1'
             }, 100);
         }
+        function showConfig() {
+            document.getElementById('config').style.display = 'flex'
+            setTimeout(() => {
+                document.getElementById('config').style.opacity = '1'
+            }, 100);
+        }
         function ocultGuide() {
             document.getElementById('formattingGuideModal').style.opacity = '0'
             setTimeout(() => {
                 document.getElementById('formattingGuideModal').style.display = 'none'
-
+            }, 500);
+        }
+        function ocultConfig() {
+            document.getElementById('config').style.opacity = '0'
+            setTimeout(() => {
+                document.getElementById('config').style.display = 'none'
             }, 500);
         }
         function showTab(tabId) {
@@ -595,48 +705,63 @@
             style="max-height: 180px; max-width: 100%; border-radius: 8px; display: block; margin: 0 auto; background-color: #2d2d2d; border: 5px solid rgba(0, 0, 0, 0.1);" />
     </div>
     <div id="formattingGuideModal" class="guide">
-        <img src="https://media.tenor.com/S7E33qGuPkYAAAAi/hikari-shupogaki.gif" style="margin: 5px; border: 1px solid #1a73e8; width: 40%; border-radius: 50%;"> 
-        <div style="max-width: 400px; width: 90%; background: #2d2d2d; border-radius: 12px; padding: 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.3);">
+        <img src="https://media.tenor.com/S7E33qGuPkYAAAAi/hikari-shupogaki.gif"
+            style="margin: 5px; border: 1px solid #1a73e8; width: 40%; border-radius: 50%;">
+        <div
+            style="max-width: 400px; width: 90%; background: #2d2d2d; border-radius: 12px; padding: 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.3);">
             <h3 style="margin: 0 0 20px; color: #1a73e8; text-align: center; font-size: 20px;">Guia de Formatação</h3>
 
             <!-- NAVBAR -->
             <div style="display: flex; justify-content: center; gap: 8px; margin-bottom: 20px;">
-                <button class="tab-btn" onclick="showTab('formatacao')" style="background: #333; color: #ccc; border: none; padding: 8px 16px; border-radius: 20px; cursor: pointer; transition: all 0.2s; font-size: 14px;">Formatação</button>
-                <button class="tab-btn" onclick="showTab('comandos')" style="background: #333; color: #ccc; border: none; padding: 8px 16px; border-radius: 20px; cursor: pointer; transition: all 0.2s; font-size: 14px;">Comandos</button>
+                <button class="tab-btn" onclick="showTab('formatacao')"
+                    style="background: #333; color: #ccc; border: none; padding: 8px 16px; border-radius: 20px; cursor: pointer; transition: all 0.2s; font-size: 14px;">Formatação</button>
+                <button class="tab-btn" onclick="showTab('comandos')"
+                    style="background: #333; color: #ccc; border: none; padding: 8px 16px; border-radius: 20px; cursor: pointer; transition: all 0.2s; font-size: 14px;">Comandos</button>
             </div>
 
             <!-- ABA: FORMATAÇÃO -->
             <div class="tab-content" id="tab-formatacao">
-                <ul style="margin: 0; padding: 0; list-style: none; display: grid; grid-template-columns: 1fr; gap: 12px;">
-                    <li style="display: flex; align-items: center; justify-content: space-between; padding: 10px; background: #333; border-radius: 8px;">
-                        <span style="color: #ccc;"><code>*negrito*</code></span> 
+                <ul
+                    style="margin: 0; padding: 0; list-style: none; display: grid; grid-template-columns: 1fr; gap: 12px;">
+                    <li
+                        style="display: flex; align-items: center; justify-content: space-between; padding: 10px; background: #333; border-radius: 8px;">
+                        <span style="color: #ccc;"><code>*negrito*</code></span>
                         <span style="color: #fff; font-weight: bold;"><code>→ negrito</code></span>
                     </li>
-                    <li style="display: flex; align-items: center; justify-content: space-between; padding: 10px; background: #333; border-radius: 8px;">
-                        <span style="color: #ccc;"><code>_itálico_</code></span> 
+                    <li
+                        style="display: flex; align-items: center; justify-content: space-between; padding: 10px; background: #333; border-radius: 8px;">
+                        <span style="color: #ccc;"><code>_itálico_</code></span>
                         <span style="color: #fff; font-style: italic;"><code>→ itálico</code></span>
                     </li>
-                    <li style="display: flex; align-items: center; justify-content: space-between; padding: 10px; background: #333; border-radius: 8px;">
+                    <li
+                        style="display: flex; align-items: center; justify-content: space-between; padding: 10px; background: #333; border-radius: 8px;">
                         <span style="color: #ccc;"><code>_sublinhado_</code></span>
                         <span style="color: #fff; text-decoration: underline;"><code>→ sublinhado</code></span>
                     </li>
-                    <li style="display: flex; align-items: center; justify-content: space-between; padding: 10px; background: #333; border-radius: 8px;">
+                    <li
+                        style="display: flex; align-items: center; justify-content: space-between; padding: 10px; background: #333; border-radius: 8px;">
                         <span style="color: #ccc;"><code>~spoiler~</code></span>
-                        <span style="color: #4caf50; background: rgba(76, 175, 80, 0.1); padding: 2px 6px; border-radius: 4px;"><code>→ spoiler</code></span>
+                        <span
+                            style="color: #4caf50; background: rgba(76, 175, 80, 0.1); padding: 2px 6px; border-radius: 4px;"><code>→ spoiler</code></span>
                     </li>
                 </ul>
             </div>
 
             <!-- ABA: COMANDOS -->
             <div class="tab-content" id="tab-comandos" style="display: none;">
-                <ul style="margin: 0; padding: 0; list-style: none; display: grid; grid-template-columns: 1fr; gap: 12px;">
+                <ul
+                    style="margin: 0; padding: 0; list-style: none; display: grid; grid-template-columns: 1fr; gap: 12px;">
                     <li style="padding: 12px; background: #333; border-radius: 8px;">
-                        <code style="display: block; color: #1a73e8; margin-bottom: 4px; font-size: 14px;">/dado Jogador, Inimigo</code>
-                        <span style="color: #ccc; font-size: 13px;">Rola um dado para cada nome, podem ser aliados, inimigos.. etc. Pode ser feito individualmente também.</span>
+                        <code
+                            style="display: block; color: #1a73e8; margin-bottom: 4px; font-size: 14px;">/dado Jogador, Inimigo</code>
+                        <span style="color: #ccc; font-size: 13px;">Rola um dado para cada nome, podem ser aliados,
+                            inimigos.. etc. Pode ser feito individualmente também.</span>
                     </li>
                     <li style="padding: 12px; background: #333; border-radius: 8px;">
-                        <code style="display: block; color: #1a73e8; margin-bottom: 4px; font-size: 14px;">@nome de alguém@</code>
-                        <span style="color: #ccc; font-size: 13px;">Destaca uma mensagem para alguém em específico</span>
+                        <code
+                            style="display: block; color: #1a73e8; margin-bottom: 4px; font-size: 14px;">@nome de alguém@</code>
+                        <span style="color: #ccc; font-size: 13px;">Destaca uma mensagem para alguém em
+                            específico</span>
                     </li>
                 </ul>
             </div>
@@ -646,14 +771,39 @@
                 style="background: #1a73e8; color: white; border: none; padding: 10px 20px; border-radius: 20px; margin-top: 20px; cursor: pointer; width: 100%; font-weight: bold; transition: background 0.2s;">Fechar</button>
         </div>
     </div>
+    <div id="config" class="config">
+        <img src="https://media.tenor.com/44zpcrJfsKcAAAAi/tachibana-hikari-tachibana-nozomi.gif"
+            style="margin: 5px; border: 1px solid #1a73e8; width: 40%; border-radius: 50%;">
+        <div
+            style="max-width: 400px; width: 90%; background: #2d2d2d; border-radius: 12px; padding: 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.3);">
+            <h3 style="margin: 0 0 20px; color: #1a73e8; text-align: center; font-size: 20px;">Configurações</h3>
+            <div class="tab-content-config" id="tab-formatacao">
+                <ul
+                    style="margin: 0; padding: 0; list-style: none; display: grid; grid-template-columns: 1fr; gap: 12px;">
+                    <li
+                        style="display: flex; align-items: center; justify-content: space-between; background: #333; border-radius: 8px;">
+                        <label class="switch">
+                            <span class="switch-label">Mostrar só menções ou suas mensagens.</span>
+                            <input type="checkbox" id="toggleFilterBtn">
+                            <span class="slider"></span>
+                        </label>
+                    </li>
+                </ul>
+            </div>
+            <!-- Botão fechar -->
+            <button onclick="ocultConfig()"
+                style="background: #1a73e8; color: white; border: none; padding: 10px 20px; border-radius: 20px; margin-top: 20px; cursor: pointer; width: 100%; font-weight: bold; transition: background 0.2s;">Fechar</button>
+        </div>
 
+
+    </div>
 
     <form id="messageForm" onsubmit="sendMessage(event)"
         style="position: fixed; bottom: 0; left: 0; right: 0; z-index: 20;">
         <div
             style="display: flex; align-items: center; gap: 4px; padding: 12px 10px; width: 100%; box-sizing: border-box;">
             <button type="button" onclick="showGuide()"
-                style="position: fixed; right: 20px; top: 100px; background: #2d2d2d; border: none; padding: 8px; color: #9e9e9e; border-radius: 50%; width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 2px 5px rgba(0,0,0,0.2); z-index: 25;">
+                style="position: fixed; right: 20px; top: 90px; background: #2d2d2d; border: none; padding: 8px; color: #9e9e9e; border-radius: 50%; width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 2px 5px rgba(0,0,0,0.2); z-index: 25;">
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <path
                         d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z"
@@ -664,6 +814,27 @@
                         stroke-linejoin="round" />
                     <path d="M15 9H15.01" stroke="currentColor" stroke-width="2" stroke-linecap="round"
                         stroke-linejoin="round" />
+                </svg>
+            </button>
+            <button type="button" onclick="showConfig()"
+                style="position: fixed; right: 80px; top: 90px; background: #2d2d2d; border: none; padding: 8px; color: #9e9e9e; border-radius: 50%; width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 2px 5px rgba(0,0,0,0.2); z-index: 25;">
+                <svg version="1.1" id="_x32_" xmlns="http://www.w3.org/2000/svg"
+                    xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 512 512" xml:space="preserve"
+                    fill="#9e9e9e">
+                    <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
+                    <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g>
+                    <g id="SVGRepo_iconCarrier">
+                        <style type="text/css">
+                            .st0 {
+                                fill: #9e9e9e;
+                            }
+                        </style>
+                        <g>
+                            <path class="st0"
+                                d="M496,293.984c9.031-0.703,16-8.25,16-17.297v-41.375c0-9.063-6.969-16.594-16-17.313l-54.828-4.281 c-3.484-0.266-6.484-2.453-7.828-5.688l-18.031-43.516c-1.344-3.219-0.781-6.906,1.5-9.547l35.75-41.813 c5.875-6.891,5.5-17.141-0.922-23.547l-29.25-29.25c-6.406-6.406-16.672-6.813-23.547-0.922l-41.813,35.75 c-2.641,2.266-6.344,2.844-9.547,1.516l-43.531-18.047c-3.219-1.328-5.422-4.375-5.703-7.828l-4.266-54.813 C293.281,6.969,285.75,0,276.688,0h-41.375c-9.063,0-16.594,6.969-17.297,16.016l-4.281,54.813c-0.266,3.469-2.469,6.5-5.688,7.828 l-43.531,18.047c-3.219,1.328-6.906,0.75-9.563-1.516l-41.797-35.75c-6.875-5.891-17.125-5.484-23.547,0.922l-29.25,29.25 c-6.406,6.406-6.797,16.656-0.922,23.547l35.75,41.813c2.25,2.641,2.844,6.328,1.5,9.547l-18.031,43.516 c-1.313,3.234-4.359,5.422-7.813,5.688L16,218c-9.031,0.719-16,8.25-16,17.313v41.359c0,9.063,6.969,16.609,16,17.313l54.844,4.266 c3.453,0.281,6.5,2.484,7.813,5.703l18.031,43.516c1.344,3.219,0.75,6.922-1.5,9.563l-35.75,41.813 c-5.875,6.875-5.484,17.125,0.922,23.547l29.25,29.25c6.422,6.406,16.672,6.797,23.547,0.906l41.797-35.75 c2.656-2.25,6.344-2.844,9.563-1.5l43.531,18.031c3.219,1.344,5.422,4.359,5.688,7.844l4.281,54.813 c0.703,9.031,8.234,16.016,17.297,16.016h41.375c9.063,0,16.594-6.984,17.297-16.016l4.266-54.813 c0.281-3.484,2.484-6.5,5.703-7.844l43.531-18.031c3.203-1.344,6.922-0.75,9.547,1.5l41.813,35.75 c6.875,5.891,17.141,5.5,23.547-0.906l29.25-29.25c6.422-6.422,6.797-16.672,0.922-23.547l-35.75-41.813 c-2.25-2.641-2.844-6.344-1.5-9.563l18.031-43.516c1.344-3.219,4.344-5.422,7.828-5.703L496,293.984z M256,342.516 c-23.109,0-44.844-9-61.188-25.328c-16.344-16.359-25.344-38.078-25.344-61.203c0-23.109,9-44.844,25.344-61.172 c16.344-16.359,38.078-25.344,61.188-25.344c23.125,0,44.844,8.984,61.188,25.344c16.344,16.328,25.344,38.063,25.344,61.172 c0,23.125-9,44.844-25.344,61.203C300.844,333.516,279.125,342.516,256,342.516z">
+                            </path>
+                        </g>
+                    </g>
                 </svg>
             </button>
             <button type="button" onclick="document.getElementById('imageInput').click()"

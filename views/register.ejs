@@ -18,7 +18,8 @@
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background: linear-gradient(to bottom, rgb(15, 15, 15), rgb(10, 10, 10));
-            padding-top: 20px;
+            height: 100vh;
+            margin: 0;
             display: flex; justify-content: center; align-items: center; flex-direction: column;
             margin: 0 auto; 
             color: #333;
@@ -221,12 +222,7 @@ form {
 <body>
     <form action="/register" enctype="multipart/form-data" method="POST" style="margin-top: 0;">
         <h2>Cadastro de Usuário</h2>
-        <div>
-            <label for="username">Nome de usuário:</label>
-            <input type="text" id="username" name="username" placeholder="Digite seu nome de usuário" required>
-        </div>
-        <div>
-            <label for="perfil">Imagem de perfil:</label>
+        <label for="perfil">Imagem de perfil:</label>
             <label for="upload" class="custom-file-upload">
                 <svg style="color: #1a73e8;" xmlns="http://www.w3.org/2000/svg" width="24" height="24"
                     fill="#1a73e8" viewBox="0 0 24 24">
@@ -237,11 +233,16 @@ form {
             </label>
             <input type="file" id="upload" name="perfil" accept="image/*" onchange="handleImageUpload()">
             <p class="hint">Envie uma imagem para o perfil (JPEG, PNG).</p>
-            <div style="width: 100%; display: flex; justify-content: center; align-items: center;">
+            <div style="margin: 0; width: 100%; display: flex; justify-content: center; align-items: center;">
                 <div id="imagePreview" class="preview-image"
-                    style="display: none; width: 300px; height: 300px; background-size: cover;">
+                    style="display: none; width: 200px; height: 200px; background-size: cover;">
                 </div>
             </div>
+        <div>
+            <label for="username">Nome de usuário:</label>
+            <input type="text" id="username" name="username" placeholder="Digite seu nome de usuário" required>
+        </div>
+        <div>
             <div>
                 <label for="number">Seu número único:</label>
                 <input style="color: gray;" type="text" id="number" name="number" placeholder="Carregando.." readonly>

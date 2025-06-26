@@ -3,12 +3,31 @@ const bcrypt = require('bcryptjs');
 
 const { Schema } = mongoose;
 
+const atributosSchema = new Schema({
+  forca: Number,
+  resistencia: Number,
+  velocidade: Number,
+  agilidade: Number,
+  nen: Number
+}, { _id: false });
+
+const dataSchema = new Schema({
+  nome: { type: String, required: true },
+  atributos: { type: atributosSchema, required: true },
+  itens: { type: Object, default: {} },
+  dinheiro: { type: Number, default: 0 }
+});
+
 // Definindo o esquema de usuário
 const UserSchema = new Schema({
     username: { type: String, required: true, unique: true },
     number: { type: String, required: true, unique: true },
     perfil: { type: String, required: true },
     password: { type: String, required: false },
+    data: {
+        type: dataSchema, // aceita qualquer JSON
+        required: false,
+    },
     lastMessageTime: {
         type: Date, // Armazena o tempo da última mensagem
         default: null
@@ -18,30 +37,6 @@ const UserSchema = new Schema({
         required: true,
         default: 0 // Inicialmente 0, você pode definir um valor inicial, se necessário.
     },
-    deck: {
-        type: [Schema.Types.Mixed], // Array flexível que aceita qualquer tipo de dado
-        required: true,
-        default: [] // Inicializa o deck como um array vazio
-    },
-    battleReview: [
-        {
-            nome: { type: String, required: true },  // Nome do jogador ou oponente na batalha
-            cartas: [
-                {
-                    nome: { type: String, required: true },  // Nome da carta
-                    poder: { type: Number, required: true }  // Poder da carta
-                }
-            ],
-            vida: { type: Number, required: true },
-            energia: { type: Number, required: true },
-            envenenado: [
-                {
-                    envenenado: { type: Boolean, default: false },  // Inicialmente false
-                    dano: { type: Number, default: 0 }  // Inicialmente 0
-                }
-            ]
-        }
-    ]
 });
 
 // Método para comparar senhas

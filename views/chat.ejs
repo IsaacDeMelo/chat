@@ -119,6 +119,32 @@
             border: 5px solid rgba(0, 0, 0, 0.1);
         }
 
+        * {
+            scrollbar-width: thin;
+            /* Firefox: pouco espessas 💡 */
+            scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
+            /* Polegar pálido sobre fundo transparente */
+        }
+
+        /* Chrome/Safari/WebKit */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+            background: transparent;
+            /* Track invisível */
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background-color: rgba(255, 255, 255, 0.2);
+            /* Thumb sutil */
+            border-radius: 3px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background-color: rgba(255, 255, 255, 0.4);
+            /* Leve realce no hover */
+        }
+
         .message.my-message .content {
             background-color: #1a73e8;
             width: 100%;
@@ -251,7 +277,8 @@
 
         .switch {
             display: flex;
-            width: 100%; height: 100%;
+            width: 100%;
+            height: 100%;
             align-items: center;
             gap: 10px;
             padding: 10px;
@@ -344,12 +371,47 @@
         .tab-btn:hover {
             background-color: #2a91ff;
         }
+
+        body {
+            background: #1e1e2f;
+            color: white;
+            font-family: sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        .radar-chart {
+            width: 100%;
+            min-height: 220px;
+            display: flex;
+            justify-content: center;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        svg {
+            width: 250px;
+            height: 250px;
+        }
+
+        text {
+            fill: white;
+            font-size: 22px;
+            font-weight: bold;
+        }
     </style>
+    <script type="text/template" id="usuario-data">
+        <%- JSON.stringify(user) %>
+    </script>
     <script src="/socket.io/socket.io.js"></script>
 
     <script defer>
         var User;
         var messagesBackup;
+
         function previewImage(event) {
             const file = event.target.files[0];
             if (!file) return;
@@ -381,6 +443,129 @@
         }
 
         document.addEventListener('DOMContentLoaded', function () {
+            // eslint-disable-next-line
+            try{
+            const personagem = JSON.parse(document.getElementById('usuario-data').textContent)
+            const attributes = {
+                F: personagem.data.atributos.forca,  // Força
+                R: personagem.data.atributos.resistencia,  // Resistência
+                V: personagem.data.atributos.velocidade,  // Velocidade
+                A: personagem.data.atributos.agilidade,  // Agilidade
+                N: personagem.data.atributos.nen   // Nen
+            };
+            const colors = {
+                F: '#FF4C4C',  // vermelho
+                R: '#3399FF',  // laranja
+                V: '#FFA500',  // verde
+                A: '#00CC66',  // azul
+                N: '#AA00FF'   // roxo
+            };
+
+            const maxVal = 1000;
+            const centerX = 300;
+            const centerY = 300;
+            const radius = 200;
+            const labels = ['F', 'R', 'V', 'A', 'N'];
+            const angleStep = (2 * Math.PI) / 5;
+
+            const svg = document.getElementById("radarSvg");
+
+            function polarToCartesian(angle, valueRatio) {
+                const r = radius * valueRatio;
+                return {
+                    x: centerX + r * Math.sin(angle),
+                    y: centerY - r * Math.cos(angle)
+                };
+            }
+
+            // Draw base pentagon
+            for (let step = 1; step <= 5; step++) {
+                let points = [];
+                for (let i = 0; i < 5; i++) {
+                    const angle = angleStep * i;
+                    const pos = polarToCartesian(angle, step / 5);
+                    points.push(`${pos.x},${pos.y}`);
+                }
+                const polygon = document.createElementNS("http://www.w3.org/2000/svg", "polygon");
+                polygon.setAttribute("points", points.join(" "));
+                polygon.setAttribute("stroke", "#888");
+                polygon.setAttribute("fill", "none");
+                svg.appendChild(polygon);
+            }
+
+            // Draw attribute polygon
+            const attributePoints = [];
+            let prevPos = null;
+            let i = 0;
+
+            for (let key of labels) {
+                const angle = angleStep * i;
+                const value = attributes[key];
+                const ratio = value / maxVal;
+                const pos = polarToCartesian(angle, ratio);
+                attributePoints.push(pos);
+
+                // Desenha linha colorida se houver ponto anterior
+                if (prevPos) {
+                    const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
+                    line.setAttribute("x1", prevPos.x);
+                    line.setAttribute("y1", prevPos.y);
+                    line.setAttribute("x2", pos.x);
+                    line.setAttribute("y2", pos.y);
+                    line.setAttribute("stroke", colors[key]);
+                    line.setAttribute("stroke-width", "3");
+                    svg.appendChild(line);
+                }
+
+                prevPos = pos;
+                i++;
+            }
+
+            // Fecha o polígono com linha colorida final
+            const firstPos = attributePoints[0];
+            const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
+            line.setAttribute("x1", prevPos.x);
+            line.setAttribute("y1", prevPos.y);
+            line.setAttribute("x2", firstPos.x);
+            line.setAttribute("y2", firstPos.y);
+            line.setAttribute("stroke", colors[labels[0]]);
+            line.setAttribute("stroke-width", "3");
+            svg.appendChild(line);
+
+            const filledPolygon = document.createElementNS("http://www.w3.org/2000/svg", "polygon");
+            filledPolygon.setAttribute("points", attributePoints.map(p => `${p.x},${p.y}`).join(" "));
+            filledPolygon.setAttribute("fill", "rgba(100, 150, 255, 0.3)");  // cor azulada neutra com transparência
+            filledPolygon.setAttribute("stroke", "none");
+            svg.appendChild(filledPolygon);
+
+
+            // Draw lines and labels
+            i = 0;
+            for (let key of labels) {
+                const angle = angleStep * i;
+                const outer = polarToCartesian(angle, 1);
+                // Draw line
+                const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
+                line.setAttribute("x1", centerX);
+                line.setAttribute("y1", centerY);
+                line.setAttribute("x2", outer.x);
+                line.setAttribute("y2", outer.y);
+                line.setAttribute("stroke", "#666");
+                svg.appendChild(line);
+
+                // Add label
+                const label = document.createElementNS("http://www.w3.org/2000/svg", "text");
+                label.setAttribute("x", outer.x);
+                label.setAttribute("y", outer.y);
+                label.setAttribute("text-anchor", "middle");
+                label.setAttribute("dy", angle < Math.PI ? "-10" : "20");
+                label.textContent = `${key} (${attributes[key]})`;
+                svg.appendChild(label);
+                i++;
+            }
+            } catch (err){
+
+            }
             User = document.getElementById('self').dataset.user;
             const imageInput = document.getElementById('imageInput');
             imageInput.addEventListener('change', previewImage);  // Usando eventListener
@@ -393,7 +578,6 @@
                 document.getElementById('imagePreview').style.display = 'none'; // Oculta a pré-visualização
             });
         });
-
 
         function autoResize(textarea) {
             // Reset height to calculate new height
@@ -559,6 +743,7 @@
             text = text.replace(/~(.*?)~/g, '<span style="color: #4caf50; background: #4caf5020; padding: 0 4px; border-radius: 3px;">$1</span>');
 
             // Menções com @Nome@ (pode ter espaços)
+            try{
             text = text.replace(/@([^@]+)@/g, (match, mentioned) => {
                 if (mentioned.trim().toLowerCase() === User.toLowerCase()) {
                     return `<span style="color: #1a73e8; font-weight: bold; border-radius: 5px; padding: 1px; background-color: #1a73e820; ;">@${mentioned}@</span>`;
@@ -566,6 +751,8 @@
                     return match;
                 }
             });
+            } catch (err) {
+            }
 
             return text;
         }
@@ -881,7 +1068,8 @@
                 <button id="closeSidebar"
                     style="background: none; border: none; color: #fff; font-size: 20px; cursor: pointer;">×</button>
             </div>
-            <div id="membersList" style="display: flex; flex-direction: column; gap: 8px;">
+            <div id="membersList"
+                style="max-height: 322px; overflow-y: scroll; display: flex; flex-direction: column; gap: 8px;">
                 <% users.forEach(element=> {%>
                     <div
                         style="display: flex; align-items: center; gap: 12px; padding: 8px; border-radius: 8px; background-color: #2d2d2d;">
@@ -906,8 +1094,24 @@
                     <%});%>
             </div>
         </div>
+        <% if (user.data.nome !="Personagem" ){%>
+            <div class="radar-chart">
+                <h3 style="margin: 0px; padding-top: 20px">
+                    <%=user.data.nome%>
+                </h3>
+                <p style="font-size: 15px">Atributos</p>
+                <svg viewBox="0 0 600 600" id="radarSvg"></svg>
+            </div>
+        <% } else { %>
+        <div class="radar-chart">
+                <h3 style="margin: 0px; padding-top: 20px">
+                    Sem Personagem
+                </h3>
+                <button style="background: #1a73e8; color: white; border: none; padding: 10px 20px; border-radius: 20px; margin-top: 20px; cursor: pointer; width: 70%; font-weight: bold; transition: background 0.2s;">Crie ele agora</button>
+            </div>
+        <% } %>
     </div>
     </div>
 </body>
 
-</html> guidemodal
+</html>

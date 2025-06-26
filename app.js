@@ -1,4 +1,5 @@
 const express = require('express');
+const util = require('util');
 const mongoose = require('mongoose');
 const dotenv = require('dotenv');
 const Message = require('./models/message.js');
@@ -94,11 +95,11 @@ app.post('/register', upload.single('perfil'), async (req, res) => {
     const { username, number } = req.body;
     const password = Math.floor(100000000 + Math.random() * 900000000);
     const email = String(Math.floor(100000000 + Math.random() * 9000000000));
+    const data = { nome: "Personagem", atributos: { forca: 0, resistencia: 0, velocidade: 0, agilidade: 0, nen: 0 }, itens: {}, dinheiro: 0 }
     console.log( username, number, password, email);
     try {
         // Verifica se o usuário já existe
         const existingUser = await User.findOne({ number });
-        console.log(existingUser)
         if (existingUser) {
             return res.status(400).send('Você já tem uma conta.');
         }
@@ -106,6 +107,7 @@ app.post('/register', upload.single('perfil'), async (req, res) => {
         // Obtenha a URL da imagem enviada
         const perfilUrl = req.file.path;
         console.log(perfilUrl);
+        console.log(data.atributos)
         // Cria um novo usuário
         const newUser = new User({
             username,
@@ -113,7 +115,7 @@ app.post('/register', upload.single('perfil'), async (req, res) => {
             perfil: perfilUrl, // Salva a URL no banco de dados
             email,
             password,
-
+            data,
         });
 
         await newUser.save();

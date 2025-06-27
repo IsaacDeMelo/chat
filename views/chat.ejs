@@ -1094,7 +1094,7 @@
                     <%});%>
             </div>
         </div>
-        <% if (user.data.nome !="Personagem" ){%>
+        <% try { if (user.data.nome !="Personagem" ){%>
             <div class="radar-chart">
                 <h3 style="margin: 0px; padding-top: 20px">
                     <%=user.data.nome%>
@@ -1109,7 +1109,14 @@
                 </h3>
                 <button style="background: #1a73e8; color: white; border: none; padding: 10px 20px; border-radius: 20px; margin-top: 20px; cursor: pointer; width: 70%; font-weight: bold; transition: background 0.2s;">Crie ele agora</button>
             </div>
-        <% } %>
+        <% }} catch (err) { %>
+            <div class="radar-chart">
+                <h3 style="margin: 0px; padding-top: 20px">
+                    Sem Personagem
+                </h3>
+                <button style="background: #1a73e8; color: white; border: none; padding: 10px 20px; border-radius: 20px; margin-top: 20px; cursor: pointer; width: 70%; font-weight: bold; transition: background 0.2s;">Crie ele agora</button>
+            </div>
+        <%}%>
     </div>
     </div>
 </body>

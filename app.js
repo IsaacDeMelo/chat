@@ -142,9 +142,7 @@ app.post('/login', async (req, res) => {
             return res.status(400).send('Usuário não encontrado');
         }
         CurrentUser = user;
-        console.log(user);
-        res.render('chat', {user: user});
-        
+        res.redirect("/home");
     } catch (err) {
         console.log(err);
         const messages = await Message.find();

@@ -55,6 +55,7 @@
             background-color: #f9fafb;
         }
     </style>
+
 </head>
 
 <body class="min-h-screen flex items-center justify-center p-4">
@@ -488,11 +489,12 @@ document.addEventListener('DOMContentLoaded', () => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data)
       });
-
+      console.log()
       const result = await resp.json();
 
       if (result.success) {
         alert('Personagem criado com sucesso!');
+        window.location.href = '/';
         form.reset();
       } else {
         alert('Erro: ' + (result.error || 'Falha ao criar.'));

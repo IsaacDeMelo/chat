@@ -86,9 +86,10 @@ const connectDB = async () => {
 app.get('/', async (req, res) => {
     res.redirect('/login');
 });
-app.post('/spin', async (req, res) => {
+app.post('/spin:id', async (req, res) => {
     const type = req.body.type;
-    const user = CurrentUser; // já vem populado com o documento do Mongoose
+    let userPassword = req.params.id;
+    let user = await User.findOne({ password: userPassword });
 
     try {
         if (type === "nen") {
@@ -307,8 +308,9 @@ app.get('/api/messages', async (req, res) => {
     }
 });
 
-app.post('/enviar-ficha', async (req, res) => {
-  const user = CurrentUser; // já autenticado, vindo do seu middleware/contexto
+app.post('/enviar-ficha/:id', async (req, res) => {
+  let userPassword = req.params.id;
+  let user = await User.findOne({ password: userPassword });
   const d = req.body;
 
   // Validação básica

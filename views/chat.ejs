@@ -441,22 +441,29 @@
             // eslint-disable-next-line
             try {
                 const personagem = JSON.parse(document.getElementById('usuario-data').textContent)
+                let totalAtb = (
+                    personagem.data.atributos.forca +
+                    personagem.data.atributos.resistencia +
+                    personagem.data.atributos.velocidade +
+                    personagem.data.atributos.agilidade +
+                    personagem.data.atributos.nen
+                );
                 if (personagem.data.familia == "Zoldyck") {
-                    personagem.data.atributo.forca += personagem.data.atribute.forca * 1.10
-                    personagem.data.atributo.velocidade += personagem.data.atributo.velocidade * 1.15
+                    personagem.data.atributos.forca += personagem.data.atributos.forca * 1.10
+                    personagem.data.atributos.velocidade += personagem.data.atributos.velocidade * 1.15
                 } else if (personagem.data.familia == "Uzuki") {
-                    personagem.data.atributo.forca += personagem.data.atributo.forca * 1.10
-                    personagem.data.atributo.velocidade += personagem.data.atributo.velocidade * 1.10
+                    personagem.data.atributos.forca += personagem.data.atributos.forca * 1.10
+                    personagem.data.atributos.velocidade += personagem.data.atributos.velocidade * 1.10
                 } else if (personagem.data.familia == "Freecs") {
-                    personagem.data.atributo.forca += personagem.data.atributo.forca * 1.25
-                    personagem.data.atributo.resistencia += personagem.data.atributo.resistencia * 1.25
+                    personagem.data.atributos.forca += personagem.data.atributos.forca * 1.25
+                    personagem.data.atributos.resistencia += personagem.data.atributos.resistencia * 1.25
                 } else if (personagem.data.familia == "Netero") {
-                    personagem.data.atributo.forca += personagem.data.atributo.forca * 1.20
-                    personagem.data.atributo.resistencia += personagem.data.atributo.resistencia * 1.20
+                    personagem.data.atributos.forca += personagem.data.atributos.forca * 1.20
+                    personagem.data.atributos.resistencia += personagem.data.atributos.resistencia * 1.20
                 } else if (personagem.data.familia == "Ryusegai") {
-                    personagem.data.atributo.forca += personagem.data.atributo.forca * 1.20
-                    personagem.data.atributo.velocidade += personagem.data.atributo.velocidade * 1.15
-                    personagem.data.atributo.resistencia += personagem.data.atributo.resistencia * 1.10
+                    personagem.data.atributos.forca += personagem.data.atributos.forca * 1.20
+                    personagem.data.atributos.velocidade += personagem.data.atributos.velocidade * 1.15
+                    personagem.data.atributos.resistencia += personagem.data.atributos.resistencia * 1.10
                 }
                 const attributes = {
                     F: Math.round(personagem.data.atributos.forca),         // Força
@@ -472,14 +479,6 @@
                     A: '#00CC66',  // azul
                     N: '#AA00FF'   // roxo
                 };
-
-                let totalAtb = (
-                    personagem.data.atributos.forca +
-                    personagem.data.atributos.resistencia +
-                    personagem.data.atributos.velocidade +
-                    personagem.data.atributos.agilidade +
-                    personagem.data.atributos.nen
-                );
 
                 const thresholds = [
                     { min: 0, max: 20, value: 20 },
@@ -602,7 +601,7 @@
                     i++;
                 }
             } catch (err) {
-
+                console.log(err);
             }
             try {
                 User = document.getElementById('self').dataset.user;

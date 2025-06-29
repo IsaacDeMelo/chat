@@ -86,7 +86,7 @@ const connectDB = async () => {
 app.get('/', async (req, res) => {
     res.redirect('/login');
 });
-app.post('/spin:id', async (req, res) => {
+app.post('/spin/:id', async (req, res) => {
     const type = req.body.type;
     let userPassword = req.params.id;
     let user = await User.findOne({ password: userPassword });

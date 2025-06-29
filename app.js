@@ -320,7 +320,7 @@ app.post('/enviar-ficha/:id', async (req, res) => {
             return res.status(400).json({ success: false, error: `Campo ${campo} está faltando.` });
         }
     }
-    const familia = user.data.familia
+    const familia = d.family;
     if (familia == "Nostrade") {
         d.money = 20000
     } else if (familia == "Kakin") {

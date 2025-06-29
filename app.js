@@ -348,8 +348,8 @@ app.post('/enviar-ficha/:id', async (req, res) => {
     };
 
     await user.save();
-    res.json({ success: true, message: 'Ficha enviada com sucesso!' });
-
+    res.redirect('/')
+    
   } catch (err) {
     console.error('Erro ao salvar ficha:', err);
     res.status(500).json({ success: false, error: 'Erro ao salvar no banco.' });

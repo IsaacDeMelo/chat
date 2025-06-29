@@ -449,21 +449,21 @@
                     personagem.data.atributos.nen
                 );
                 if (personagem.data.familia == "Zoldyck") {
-                    personagem.data.atributos.forca += personagem.data.atributos.forca * 1.10
-                    personagem.data.atributos.velocidade += personagem.data.atributos.velocidade * 1.15
+                    personagem.data.atributos.forca = personagem.data.atributos.forca * 1.10
+                    personagem.data.atributos.velocidade = personagem.data.atributos.velocidade * 1.15
                 } else if (personagem.data.familia == "Uzuki") {
-                    personagem.data.atributos.forca += personagem.data.atributos.forca * 1.10
-                    personagem.data.atributos.velocidade += personagem.data.atributos.velocidade * 1.10
+                    personagem.data.atributos.forca = personagem.data.atributos.forca * 1.10
+                    personagem.data.atributos.velocidade = personagem.data.atributos.velocidade * 1.10
                 } else if (personagem.data.familia == "Freecs") {
-                    personagem.data.atributos.forca += personagem.data.atributos.forca * 1.25
-                    personagem.data.atributos.resistencia += personagem.data.atributos.resistencia * 1.25
+                    personagem.data.atributos.forca = personagem.data.atributos.forca * 1.25
+                    personagem.data.atributos.resistencia = personagem.data.atributos.resistencia * 1.25
                 } else if (personagem.data.familia == "Netero") {
-                    personagem.data.atributos.forca += personagem.data.atributos.forca * 1.20
-                    personagem.data.atributos.resistencia += personagem.data.atributos.resistencia * 1.20
+                    personagem.data.atributos.forca = personagem.data.atributos.forca * 1.20
+                    personagem.data.atributos.resistencia = personagem.data.atributos.resistencia * 1.20
                 } else if (personagem.data.familia == "Ryusegai") {
-                    personagem.data.atributos.forca += personagem.data.atributos.forca * 1.20
-                    personagem.data.atributos.velocidade += personagem.data.atributos.velocidade * 1.15
-                    personagem.data.atributos.resistencia += personagem.data.atributos.resistencia * 1.10
+                    personagem.data.atributos.forca = personagem.data.atributos.forca * 1.20
+                    personagem.data.atributos.velocidade = personagem.data.atributos.velocidade * 1.15
+                    personagem.data.atributos.resistencia = personagem.data.atributos.resistencia * 1.10
                 }
                 const attributes = {
                     F: Math.round(personagem.data.atributos.forca),         // Força

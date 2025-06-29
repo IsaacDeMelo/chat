@@ -192,7 +192,7 @@ app.post('/api/login', async (req, res) => {
         if (user) {
             CurrentUser = user;
             // Número válido, retorna sucesso
-            res.redirect('/home')
+            res.redirect(`/home/${user.password}`)
         } else {
             res.redirect('/register');
             // Número não encontrado, requer registro
@@ -203,9 +203,10 @@ app.post('/api/login', async (req, res) => {
     }
 });
 
-app.get('/home', async (req, res) => {
-    if (CurrentUser){
-        let user = CurrentUser
+app.get('/home/:id', async (req, res) => {
+    let userPassword = req.params.id;
+    let user = await User.findOne({ password: userPassword });
+    if (user){
         let users = await User.find({});
         console.log(users);
         res.render('chat', {user:user, users:users});
@@ -214,10 +215,19 @@ app.get('/home', async (req, res) => {
     }
 });
 
-app.get('/ficha', async (req, res) => {
-    if (CurrentUser){
-        let user = CurrentUser
-        res.render('ficha', { user: user });
+app.get('/ficha/:id', async (req, res) => {
+    try {
+        let userPassword = req.params.id;
+        let user = await User.findOne({ password: userPassword });
+
+        if (!user) {
+            return res.status(404).send('Usuário não encontrado');
+        }
+
+        res.render('ficha', { user });
+    } catch (err) {
+        console.error(err);
+        res.status(500).send('Erro no servidor');
     }
 });
 

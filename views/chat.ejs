@@ -392,11 +392,6 @@
             align-items: center;
         }
 
-        svg {
-            width: 250px;
-            height: 250px;
-        }
-
         text {
             fill: white;
             font-size: 22px;
@@ -416,7 +411,7 @@
             const file = event.target.files[0];
             if (!file) return;
 
-            // Check if file is an image
+            // Check if file is an image ficha
             if (!file.type.match('image.*')) {
                 alert('Por favor, selecione uma imagem válida!');
                 return;
@@ -444,159 +439,173 @@
 
         document.addEventListener('DOMContentLoaded', function () {
             // eslint-disable-next-line
-            try{
-            const personagem = JSON.parse(document.getElementById('usuario-data').textContent)
-            const attributes = {
-                F: personagem.data.atributos.forca,  // Força
-                R: personagem.data.atributos.resistencia,  // Resistência
-                V: personagem.data.atributos.velocidade,  // Velocidade
-                A: personagem.data.atributos.agilidade,  // Agilidade
-                N: personagem.data.atributos.nen   // Nen
-            };
-            const colors = {
-                F: '#FF4C4C',  // vermelho
-                R: '#3399FF',  // laranja
-                V: '#FFA500',  // verde
-                A: '#00CC66',  // azul
-                N: '#AA00FF'   // roxo
-            };
-
-            let totalAtb = (personagem.data.atributos.forca + personagem.data.atributos.resistencia + personagem.data.velocidade + personagem.data.agilidade + personagem.data.nen)
-            const maxVal = 0
-            if (totalAtb <= 100){
-               maxVal = 1000; 
-            } else if (totalAtb > 100 && totalAtb <= 200){
-               maxVal = 200;
-            } else if (totalAtb > 200 && totalAtb <= 500){
-               maxVal = 500;
-            } else if (totalAtb > 500 && totalAtb <= 1000){
-               maxVal = 1000;
-            } else if (totalAtb > 1000){
-               maxVal = 5000;
-            }
-            const centerX = 300;
-            const centerY = 300;
-            const radius = 200;
-            const labels = ['F', 'R', 'V', 'A', 'N'];
-            const angleStep = (2 * Math.PI) / 5;
-
-            const svg = document.getElementById("radarSvg");
-
-            function polarToCartesian(angle, valueRatio) {
-                const r = radius * valueRatio;
-                return {
-                    x: centerX + r * Math.sin(angle),
-                    y: centerY - r * Math.cos(angle)
+            try {
+                const personagem = JSON.parse(document.getElementById('usuario-data').textContent)
+                const attributes = {
+                    F: personagem.data.atributos.forca,  // Força
+                    R: personagem.data.atributos.resistencia,  // Resistência
+                    V: personagem.data.atributos.velocidade,  // Velocidade
+                    A: personagem.data.atributos.agilidade,  // Agilidade
+                    N: personagem.data.atributos.nen   // Nen
                 };
-            }
+                const colors = {
+                    F: '#FF4C4C',  // vermelho
+                    R: '#3399FF',  // laranja
+                    V: '#FFA500',  // verde
+                    A: '#00CC66',  // azul
+                    N: '#AA00FF'   // roxo
+                };
 
-            // Draw base pentagon
-            for (let step = 1; step <= 5; step++) {
-                let points = [];
-                for (let i = 0; i < 5; i++) {
+                let totalAtb = (
+                    personagem.data.atributos.forca +
+                    personagem.data.atributos.resistencia +
+                    personagem.data.atributos.velocidade +
+                    personagem.data.atributos.agilidade +
+                    personagem.data.atributos.nen
+                );
+
+                const thresholds = [
+                    { min: 0, max: 20, value: 20 },
+                    { min: 21, max: 100, value: 100 },
+                    { min: 101, max: 200, value: 200 },
+                    { min: 201, max: 500, value: 500 },
+                    { min: 501, max: 1000, value: 1000 },
+                    { min: 1001, max: 2000, value: 2000 },
+                    { min: 2001, max: 5000, value: 5000 },
+                    { min: 5001, max: Infinity, value: 10000 }
+                ];
+
+                // Encontra o valor adequado para maxVal
+                for (const t of thresholds) {
+                    if (totalAtb >= t.min && totalAtb <= t.max) {
+                        maxVal = t.value;
+                        break;
+                    }
+                }
+                console.log(maxVal);
+                const centerX = 300;
+                const centerY = 300;
+                const radius = 200;
+                const labels = ['F', 'R', 'V', 'A', 'N'];
+                const angleStep = (2 * Math.PI) / 5;
+
+                const svg = document.getElementById("radarSvg");
+
+                function polarToCartesian(angle, valueRatio) {
+                    const r = radius * valueRatio;
+                    return {
+                        x: centerX + r * Math.sin(angle),
+                        y: centerY - r * Math.cos(angle)
+                    };
+                }
+
+                // Draw base pentagon
+                for (let step = 1; step <= 5; step++) {
+                    let points = [];
+                    for (let i = 0; i < 5; i++) {
+                        const angle = angleStep * i;
+                        const pos = polarToCartesian(angle, step / 5);
+                        points.push(`${pos.x},${pos.y}`);
+                    }
+                    const polygon = document.createElementNS("http://www.w3.org/2000/svg", "polygon");
+                    polygon.setAttribute("points", points.join(" "));
+                    polygon.setAttribute("stroke", "#888");
+                    polygon.setAttribute("fill", "none");
+                    svg.appendChild(polygon);
+                }
+
+                // Draw attribute polygon
+                const attributePoints = [];
+                let prevPos = null;
+                let i = 0;
+
+                for (let key of labels) {
                     const angle = angleStep * i;
-                    const pos = polarToCartesian(angle, step / 5);
-                    points.push(`${pos.x},${pos.y}`);
-                }
-                const polygon = document.createElementNS("http://www.w3.org/2000/svg", "polygon");
-                polygon.setAttribute("points", points.join(" "));
-                polygon.setAttribute("stroke", "#888");
-                polygon.setAttribute("fill", "none");
-                svg.appendChild(polygon);
-            }
+                    const value = attributes[key];
+                    const ratio = value / maxVal;
+                    const pos = polarToCartesian(angle, ratio);
+                    attributePoints.push(pos);
 
-            // Draw attribute polygon
-            const attributePoints = [];
-            let prevPos = null;
-            let i = 0;
+                    // Desenha linha colorida se houver ponto anterior
+                    if (prevPos) {
+                        const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
+                        line.setAttribute("x1", prevPos.x);
+                        line.setAttribute("y1", prevPos.y);
+                        line.setAttribute("x2", pos.x);
+                        line.setAttribute("y2", pos.y);
+                        line.setAttribute("stroke", colors[key]);
+                        line.setAttribute("stroke-width", "3");
+                        svg.appendChild(line);
+                    }
 
-            for (let key of labels) {
-                const angle = angleStep * i;
-                const value = attributes[key];
-                const ratio = value / maxVal;
-                const pos = polarToCartesian(angle, ratio);
-                attributePoints.push(pos);
-
-                // Desenha linha colorida se houver ponto anterior
-                if (prevPos) {
-                    const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
-                    line.setAttribute("x1", prevPos.x);
-                    line.setAttribute("y1", prevPos.y);
-                    line.setAttribute("x2", pos.x);
-                    line.setAttribute("y2", pos.y);
-                    line.setAttribute("stroke", colors[key]);
-                    line.setAttribute("stroke-width", "3");
-                    svg.appendChild(line);
+                    prevPos = pos;
+                    i++;
                 }
 
-                prevPos = pos;
-                i++;
-            }
-
-            // Fecha o polígono com linha colorida final
-            const firstPos = attributePoints[0];
-            const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
-            line.setAttribute("x1", prevPos.x);
-            line.setAttribute("y1", prevPos.y);
-            line.setAttribute("x2", firstPos.x);
-            line.setAttribute("y2", firstPos.y);
-            line.setAttribute("stroke", colors[labels[0]]);
-            line.setAttribute("stroke-width", "3");
-            svg.appendChild(line);
-
-            const filledPolygon = document.createElementNS("http://www.w3.org/2000/svg", "polygon");
-            filledPolygon.setAttribute("points", attributePoints.map(p => `${p.x},${p.y}`).join(" "));
-            filledPolygon.setAttribute("fill", "rgba(100, 150, 255, 0.3)");  // cor azulada neutra com transparência
-            filledPolygon.setAttribute("stroke", "none");
-            svg.appendChild(filledPolygon);
-
-
-            // Draw lines and labels
-            i = 0;
-            for (let key of labels) {
-                const angle = angleStep * i;
-                const outer = polarToCartesian(angle, 1);
-                // Draw line
+                // Fecha o polígono com linha colorida final
+                const firstPos = attributePoints[0];
                 const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
-                line.setAttribute("x1", centerX);
-                line.setAttribute("y1", centerY);
-                line.setAttribute("x2", outer.x);
-                line.setAttribute("y2", outer.y);
-                line.setAttribute("stroke", "#666");
+                line.setAttribute("x1", prevPos.x);
+                line.setAttribute("y1", prevPos.y);
+                line.setAttribute("x2", firstPos.x);
+                line.setAttribute("y2", firstPos.y);
+                line.setAttribute("stroke", colors[labels[0]]);
+                line.setAttribute("stroke-width", "3");
                 svg.appendChild(line);
 
-                // Add label
-                const label = document.createElementNS("http://www.w3.org/2000/svg", "text");
-                label.setAttribute("x", outer.x);
-                label.setAttribute("y", outer.y);
-                label.setAttribute("text-anchor", "middle");
-                label.setAttribute("dy", angle < Math.PI ? "-10" : "20");
-                label.textContent = `${key} (${attributes[key]})`;
-                svg.appendChild(label);
-                i++;
-            }
-            } catch (err){
+                const filledPolygon = document.createElementNS("http://www.w3.org/2000/svg", "polygon");
+                filledPolygon.setAttribute("points", attributePoints.map(p => `${p.x},${p.y}`).join(" "));
+                filledPolygon.setAttribute("fill", "rgba(100, 150, 255, 0.3)");  // cor azulada neutra com transparência
+                filledPolygon.setAttribute("stroke", "none");
+                svg.appendChild(filledPolygon);
+
+
+                // Draw lines and labels
+                i = 0;
+                for (let key of labels) {
+                    const angle = angleStep * i;
+                    const outer = polarToCartesian(angle, 1);
+                    // Draw line
+                    const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
+                    line.setAttribute("x1", centerX);
+                    line.setAttribute("y1", centerY);
+                    line.setAttribute("x2", outer.x);
+                    line.setAttribute("y2", outer.y);
+                    line.setAttribute("stroke", "#666");
+                    svg.appendChild(line);
+
+                    // Add label
+                    const label = document.createElementNS("http://www.w3.org/2000/svg", "text");
+                    label.setAttribute("x", outer.x);
+                    label.setAttribute("y", outer.y);
+                    label.setAttribute("text-anchor", "middle");
+                    label.setAttribute("dy", angle < Math.PI ? "-10" : "20");
+                    label.textContent = `${key} (${attributes[key]})`;
+                    svg.appendChild(label);
+                    i++;
+                }
+            } catch (err) {
 
             }
-            try{
-            User = document.getElementById('self').dataset.user;
-            const imageInput = document.getElementById('imageInput');
-            imageInput.addEventListener('change', previewImage);  // Usando eventListener
-
-            const previewImageElement = document.getElementById('previewImage');
-            previewImageElement.addEventListener('click', function () {
-                // Reseta o campo de entrada de imagem quando clicar na pré-visualização
+            try {
+                User = document.getElementById('self').dataset.user;
                 const imageInput = document.getElementById('imageInput');
-                imageInput.value = ''; // Cancela o upload da imagem
-                document.getElementById('imagePreview').style.display = 'none'; // Oculta a pré-visualização
-            });
+                imageInput.addEventListener('change', previewImage);  // Usando eventListener
+
+                const previewImageElement = document.getElementById('previewImage');
+                previewImageElement.addEventListener('click', function () {
+                    // Reseta o campo de entrada de imagem quando clicar na pré-visualização
+                    const imageInput = document.getElementById('imageInput');
+                    imageInput.value = ''; // Cancela o upload da imagem
+                    document.getElementById('imagePreview').style.display = 'none'; // Oculta a pré-visualização
+                });
             } catch (err) {
 
             }
         });
 
         function autoResize(textarea) {
-            // Reset height to calculate new height
+            // Reset height to calculate new height /ficha
             textarea.style.height = 'auto';
 
             // Calculate the required height
@@ -759,14 +768,14 @@
             text = text.replace(/~(.*?)~/g, '<span style="color: #4caf50; background: #4caf5020; padding: 0 4px; border-radius: 3px;">$1</span>');
 
             // Menções com @Nome@ (pode ter espaços)
-            try{
-            text = text.replace(/@([^@]+)@/g, (match, mentioned) => {
-                if (mentioned.trim().toLowerCase() === User.toLowerCase()) {
-                    return `<span style="color: #1a73e8; font-weight: bold; border-radius: 5px; padding: 1px; background-color: #1a73e820; ;">@${mentioned}@</span>`;
-                } else {
-                    return match;
-                }
-            });
+            try {
+                text = text.replace(/@([^@]+)@/g, (match, mentioned) => {
+                    if (mentioned.trim().toLowerCase() === User.toLowerCase()) {
+                        return `<span style="color: #1a73e8; font-weight: bold; border-radius: 5px; padding: 1px; background-color: #1a73e820; ;">@${mentioned}@</span>`;
+                    } else {
+                        return match;
+                    }
+                });
             } catch (err) {
             }
 
@@ -998,143 +1007,149 @@
 
     </div>
     <button type="button" onclick="showGuide()"
-                style="position: fixed; right: 20px; top: 90px; background: #2d2d2d; border: none; padding: 8px; color: #9e9e9e; border-radius: 50%; width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 2px 5px rgba(0,0,0,0.2); z-index: 25;">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path
-                        d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z"
-                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-                    <path d="M8 14C8 14 9.5 16 12 16C14.5 16 16 14 16 14" stroke="currentColor" stroke-width="2"
-                        stroke-linecap="round" stroke-linejoin="round" />
-                    <path d="M9 9H9.01" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                        stroke-linejoin="round" />
-                    <path d="M15 9H15.01" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                        stroke-linejoin="round" />
-                </svg>
-            </button>
-            <button type="button" onclick="showConfig()"
-                style="position: fixed; right: 80px; top: 90px; background: #2d2d2d; border: none; padding: 8px; color: #9e9e9e; border-radius: 50%; width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 2px 5px rgba(0,0,0,0.2); z-index: 25;">
-                <svg version="1.1" id="_x32_" xmlns="http://www.w3.org/2000/svg"
-                    xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 512 512" xml:space="preserve"
-                    fill="#9e9e9e">
-                    <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
-                    <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g>
-                    <g id="SVGRepo_iconCarrier">
-                        <style type="text/css">
-                            .st0 {
-                                fill: #9e9e9e;
-                            }
-                        </style>
-                        <g>
-                            <path class="st0"
-                                d="M496,293.984c9.031-0.703,16-8.25,16-17.297v-41.375c0-9.063-6.969-16.594-16-17.313l-54.828-4.281 c-3.484-0.266-6.484-2.453-7.828-5.688l-18.031-43.516c-1.344-3.219-0.781-6.906,1.5-9.547l35.75-41.813 c5.875-6.891,5.5-17.141-0.922-23.547l-29.25-29.25c-6.406-6.406-16.672-6.813-23.547-0.922l-41.813,35.75 c-2.641,2.266-6.344,2.844-9.547,1.516l-43.531-18.047c-3.219-1.328-5.422-4.375-5.703-7.828l-4.266-54.813 C293.281,6.969,285.75,0,276.688,0h-41.375c-9.063,0-16.594,6.969-17.297,16.016l-4.281,54.813c-0.266,3.469-2.469,6.5-5.688,7.828 l-43.531,18.047c-3.219,1.328-6.906,0.75-9.563-1.516l-41.797-35.75c-6.875-5.891-17.125-5.484-23.547,0.922l-29.25,29.25 c-6.406,6.406-6.797,16.656-0.922,23.547l35.75,41.813c2.25,2.641,2.844,6.328,1.5,9.547l-18.031,43.516 c-1.313,3.234-4.359,5.422-7.813,5.688L16,218c-9.031,0.719-16,8.25-16,17.313v41.359c0,9.063,6.969,16.609,16,17.313l54.844,4.266 c3.453,0.281,6.5,2.484,7.813,5.703l18.031,43.516c1.344,3.219,0.75,6.922-1.5,9.563l-35.75,41.813 c-5.875,6.875-5.484,17.125,0.922,23.547l29.25,29.25c6.422,6.406,16.672,6.797,23.547,0.906l41.797-35.75 c2.656-2.25,6.344-2.844,9.563-1.5l43.531,18.031c3.219,1.344,5.422,4.359,5.688,7.844l4.281,54.813 c0.703,9.031,8.234,16.016,17.297,16.016h41.375c9.063,0,16.594-6.984,17.297-16.016l4.266-54.813 c0.281-3.484,2.484-6.5,5.703-7.844l43.531-18.031c3.203-1.344,6.922-0.75,9.547,1.5l41.813,35.75 c6.875,5.891,17.141,5.5,23.547-0.906l29.25-29.25c6.422-6.422,6.797-16.672,0.922-23.547l-35.75-41.813 c-2.25-2.641-2.844-6.344-1.5-9.563l18.031-43.516c1.344-3.219,4.344-5.422,7.828-5.703L496,293.984z M256,342.516 c-23.109,0-44.844-9-61.188-25.328c-16.344-16.359-25.344-38.078-25.344-61.203c0-23.109,9-44.844,25.344-61.172 c16.344-16.359,38.078-25.344,61.188-25.344c23.125,0,44.844,8.984,61.188,25.344c16.344,16.328,25.344,38.063,25.344,61.172 c0,23.125-9,44.844-25.344,61.203C300.844,333.516,279.125,342.516,256,342.516z">
-                            </path>
+        style="position: fixed; right: 20px; top: 90px; background: #2d2d2d; border: none; padding: 8px; color: #9e9e9e; border-radius: 50%; width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 2px 5px rgba(0,0,0,0.2); z-index: 25;">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path
+                d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z"
+                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+            <path d="M8 14C8 14 9.5 16 12 16C14.5 16 16 14 16 14" stroke="currentColor" stroke-width="2"
+                stroke-linecap="round" stroke-linejoin="round" />
+            <path d="M9 9H9.01" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+            <path d="M15 9H15.01" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                stroke-linejoin="round" />
+        </svg>
+    </button>
+    <button type="button" onclick="showConfig()"
+        style="position: fixed; right: 80px; top: 90px; background: #2d2d2d; border: none; padding: 8px; color: #9e9e9e; border-radius: 50%; width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 2px 5px rgba(0,0,0,0.2); z-index: 25;">
+        <svg version="1.1" id="_x32_" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
+            viewBox="0 0 512 512" xml:space="preserve" fill="#9e9e9e">
+            <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
+            <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g>
+            <g id="SVGRepo_iconCarrier">
+                <style type="text/css">
+                    .st0 {
+                        fill: #9e9e9e;
+                    }
+                </style>
+                <g>
+                    <path class="st0"
+                        d="M496,293.984c9.031-0.703,16-8.25,16-17.297v-41.375c0-9.063-6.969-16.594-16-17.313l-54.828-4.281 c-3.484-0.266-6.484-2.453-7.828-5.688l-18.031-43.516c-1.344-3.219-0.781-6.906,1.5-9.547l35.75-41.813 c5.875-6.891,5.5-17.141-0.922-23.547l-29.25-29.25c-6.406-6.406-16.672-6.813-23.547-0.922l-41.813,35.75 c-2.641,2.266-6.344,2.844-9.547,1.516l-43.531-18.047c-3.219-1.328-5.422-4.375-5.703-7.828l-4.266-54.813 C293.281,6.969,285.75,0,276.688,0h-41.375c-9.063,0-16.594,6.969-17.297,16.016l-4.281,54.813c-0.266,3.469-2.469,6.5-5.688,7.828 l-43.531,18.047c-3.219,1.328-6.906,0.75-9.563-1.516l-41.797-35.75c-6.875-5.891-17.125-5.484-23.547,0.922l-29.25,29.25 c-6.406,6.406-6.797,16.656-0.922,23.547l35.75,41.813c2.25,2.641,2.844,6.328,1.5,9.547l-18.031,43.516 c-1.313,3.234-4.359,5.422-7.813,5.688L16,218c-9.031,0.719-16,8.25-16,17.313v41.359c0,9.063,6.969,16.609,16,17.313l54.844,4.266 c3.453,0.281,6.5,2.484,7.813,5.703l18.031,43.516c1.344,3.219,0.75,6.922-1.5,9.563l-35.75,41.813 c-5.875,6.875-5.484,17.125,0.922,23.547l29.25,29.25c6.422,6.406,16.672,6.797,23.547,0.906l41.797-35.75 c2.656-2.25,6.344-2.844,9.563-1.5l43.531,18.031c3.219,1.344,5.422,4.359,5.688,7.844l4.281,54.813 c0.703,9.031,8.234,16.016,17.297,16.016h41.375c9.063,0,16.594-6.984,17.297-16.016l4.266-54.813 c0.281-3.484,2.484-6.5,5.703-7.844l43.531-18.031c3.203-1.344,6.922-0.75,9.547,1.5l41.813,35.75 c6.875,5.891,17.141,5.5,23.547-0.906l29.25-29.25c6.422-6.422,6.797-16.672,0.922-23.547l-35.75-41.813 c-2.25-2.641-2.844-6.344-1.5-9.563l18.031-43.516c1.344-3.219,4.344-5.422,7.828-5.703L496,293.984z M256,342.516 c-23.109,0-44.844-9-61.188-25.328c-16.344-16.359-25.344-38.078-25.344-61.203c0-23.109,9-44.844,25.344-61.172 c16.344-16.359,38.078-25.344,61.188-25.344c23.125,0,44.844,8.984,61.188,25.344c16.344,16.328,25.344,38.063,25.344,61.172 c0,23.125-9,44.844-25.344,61.203C300.844,333.516,279.125,342.516,256,342.516z">
+                    </path>
+                </g>
+            </g>
+        </svg>
+    </button>
+    <% if (user.adm==true) {%>
+        <form id="messageForm" onsubmit="sendMessage(event)"
+            style="position: fixed; bottom: 0; left: 0; right: 0; z-index: 20;">
+            <div
+                style="display: flex; align-items: center; gap: 4px; padding: 12px 10px; width: 100%; box-sizing: border-box;">
+                <button type="button" onclick="document.getElementById('imageInput').click()"
+                    style="background: none; border: none; padding: 8px; color: #9e9e9e; border-radius: 50%; width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; cursor: pointer;">
+                    <svg width="64px" height="64px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
+                        <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g>
+                        <g id="SVGRepo_iconCarrier">
+                            <path
+                                d="M3 13V11C3 7.22876 3 5.34315 4.17157 4.17157C5.34315 3 7.22876 3 11 3H13C16.7712 3 18.6569 3 19.8284 4.17157C21 5.34315 21 7.22876 21 11V13C21 16.7712 21 18.6569 19.8284 19.8284C18.6569 21 16.7712 21 13 21H12"
+                                stroke="#ffffff"></path>
+                            <path fill-rule="evenodd" clip-rule="evenodd"
+                                d="M18.9976 14.2904L18.4033 13.6961L18.3931 13.6858L18.393 13.6858C18.3245 13.6173 18.2784 13.5712 18.2394 13.5353C17.0477 12.4403 15.1454 12.749 14.3611 14.1647C14.3354 14.2111 14.3062 14.2694 14.2628 14.3561L14.2564 14.369C14.227 14.4278 14.22 14.4416 14.2161 14.4486C14.0513 14.7448 13.6458 14.7948 13.4142 14.5474C13.4087 14.5415 13.3985 14.5298 13.3557 14.4799L8.37962 8.67449C8.19991 8.46483 7.88426 8.44055 7.6746 8.62026C7.46494 8.79997 7.44065 9.11562 7.62037 9.32528L12.5964 15.1307L12.6038 15.1393L12.6038 15.1393C12.6352 15.1759 12.6614 15.2066 12.6842 15.2309C13.3793 15.9731 14.5957 15.8233 15.09 14.9348C15.1062 14.9056 15.1242 14.8695 15.1458 14.8263L15.1508 14.8162C15.203 14.712 15.2218 14.6746 15.2358 14.6493C15.7064 13.7999 16.8478 13.6147 17.5628 14.2717C17.5841 14.2912 17.6138 14.3208 17.6962 14.4032L18.9755 15.6825C18.9887 15.2721 18.9948 14.812 18.9976 14.2904Z"
+                                fill="#ffffff"></path>
+                            <circle cx="16.5" cy="7.5" r="1.5" fill="#ffffff"></circle>
+                            <path
+                                d="M8 16V15.5H8.5V16H8ZM3.31235 20.3904C3.09672 20.5629 2.78207 20.528 2.60957 20.3123C2.43706 20.0967 2.47202 19.7821 2.68765 19.6096L3.31235 20.3904ZM7.5 21V16H8.5V21H7.5ZM8 16.5H3V15.5H8V16.5ZM8.31235 16.3904L3.31235 20.3904L2.68765 19.6096L7.68765 15.6096L8.31235 16.3904Z"
+                                fill="#ffffff"></path>
                         </g>
-                    </g>
-                </svg>
-            </button>
-<% if (user.adm == true) {%>
-    <form id="messageForm" onsubmit="sendMessage(event)"
-        style="position: fixed; bottom: 0; left: 0; right: 0; z-index: 20;">
-        <div
-            style="display: flex; align-items: center; gap: 4px; padding: 12px 10px; width: 100%; box-sizing: border-box;">
-            <button type="button" onclick="document.getElementById('imageInput').click()"
-                style="background: none; border: none; padding: 8px; color: #9e9e9e; border-radius: 50%; width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; cursor: pointer;">
-                <svg width="64px" height="64px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
-                    <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g>
-                    <g id="SVGRepo_iconCarrier">
-                        <path
-                            d="M3 13V11C3 7.22876 3 5.34315 4.17157 4.17157C5.34315 3 7.22876 3 11 3H13C16.7712 3 18.6569 3 19.8284 4.17157C21 5.34315 21 7.22876 21 11V13C21 16.7712 21 18.6569 19.8284 19.8284C18.6569 21 16.7712 21 13 21H12"
-                            stroke="#ffffff"></path>
-                        <path fill-rule="evenodd" clip-rule="evenodd"
-                            d="M18.9976 14.2904L18.4033 13.6961L18.3931 13.6858L18.393 13.6858C18.3245 13.6173 18.2784 13.5712 18.2394 13.5353C17.0477 12.4403 15.1454 12.749 14.3611 14.1647C14.3354 14.2111 14.3062 14.2694 14.2628 14.3561L14.2564 14.369C14.227 14.4278 14.22 14.4416 14.2161 14.4486C14.0513 14.7448 13.6458 14.7948 13.4142 14.5474C13.4087 14.5415 13.3985 14.5298 13.3557 14.4799L8.37962 8.67449C8.19991 8.46483 7.88426 8.44055 7.6746 8.62026C7.46494 8.79997 7.44065 9.11562 7.62037 9.32528L12.5964 15.1307L12.6038 15.1393L12.6038 15.1393C12.6352 15.1759 12.6614 15.2066 12.6842 15.2309C13.3793 15.9731 14.5957 15.8233 15.09 14.9348C15.1062 14.9056 15.1242 14.8695 15.1458 14.8263L15.1508 14.8162C15.203 14.712 15.2218 14.6746 15.2358 14.6493C15.7064 13.7999 16.8478 13.6147 17.5628 14.2717C17.5841 14.2912 17.6138 14.3208 17.6962 14.4032L18.9755 15.6825C18.9887 15.2721 18.9948 14.812 18.9976 14.2904Z"
-                            fill="#ffffff"></path>
-                        <circle cx="16.5" cy="7.5" r="1.5" fill="#ffffff"></circle>
-                        <path
-                            d="M8 16V15.5H8.5V16H8ZM3.31235 20.3904C3.09672 20.5629 2.78207 20.528 2.60957 20.3123C2.43706 20.0967 2.47202 19.7821 2.68765 19.6096L3.31235 20.3904ZM7.5 21V16H8.5V21H7.5ZM8 16.5H3V15.5H8V16.5ZM8.31235 16.3904L3.31235 20.3904L2.68765 19.6096L7.68765 15.6096L8.31235 16.3904Z"
-                            fill="#ffffff"></path>
-                    </g>
-                </svg>
-            </button>
-            <textarea id="messageInput" placeholder="Digite sua mensagem..."
-                style="resize: none; flex: 1 1 auto; height: 50px; max-height: 200px; padding: 8px 10px; border-radius: 10px; font-size: 16px; margin: 0 5px;"
-                oninput="autoResize(this)"></textarea>
+                    </svg>
+                </button>
+                <textarea id="messageInput" placeholder="Digite sua mensagem..."
+                    style="resize: none; flex: 1 1 auto; height: 50px; max-height: 200px; padding: 8px 10px; border-radius: 10px; font-size: 16px; margin: 0 5px;"
+                    oninput="autoResize(this)"></textarea>
 
-            <!-- Campo para upload de imagem configurações-->
-            <input type="file" id="imageInput" accept="image/*" style="display: none;" />
-            <!-- Botão de enviar -->
-            <button id="messageButton" type="submit"
-                style="background-color: #1a73e8; color: white; border: none; border-radius: 50%; width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: background-color 0.2s;">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                    <path d="M22 2L11 13" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
-                    <path d="M22 2L15 22L11 13L2 9L22 2Z" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                        stroke-linejoin="round" />
-                </svg>
-            </button>
-        </div>
-    </form>
-    <%}%>
-    </div>
-    </div>
-    <div id="sidebar"
-        style="position: fixed; top: 0; left: -300px; width: 300px; height: 100vh; background-color: #1e1e1e; z-index: 30; transition: left 0.3s; overflow-y: auto; border-right: 1px solid #333;">
-        <div style="padding: 16px; border-bottom: 1px solid #333;">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
-                <h3 style="margin: 0; color: #fff;">Membros do Grupo</h3>
-                <button id="closeSidebar"
-                    style="background: none; border: none; color: #fff; font-size: 20px; cursor: pointer;">×</button>
+                <!-- Campo para upload de imagem configurações-->
+                <input type="file" id="imageInput" accept="image/*" style="display: none;" />
+                <!-- Botão de enviar -->
+                <button id="messageButton" type="submit"
+                    style="background-color: #1a73e8; color: white; border: none; border-radius: 50%; width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: background-color 0.2s;">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                        <path d="M22 2L11 13" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+                        <path d="M22 2L15 22L11 13L2 9L22 2Z" stroke="currentColor" stroke-width="2"
+                            stroke-linecap="round" stroke-linejoin="round" />
+                    </svg>
+                </button>
             </div>
-            <div id="membersList"
-                style="max-height: 322px; overflow-y: scroll; display: flex; flex-direction: column; gap: 8px;">
-                <% users.forEach(element=> {%>
-                    <div
-                        style="display: flex; align-items: center; gap: 12px; padding: 8px; border-radius: 8px; background-color: #2d2d2d;">
-                        <img src="<%=element.perfil%>"
-                            style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover;">
-                        <div>
-                            <% if (user.username==element.username) { %>
-                                <p id="self" style="margin: 0; color: #fff;" data-user="<%=element.username%>">(Você)
-                                    <%=element.username%>
-                                </p>
-                                <% } else {%>
-                                    <p style="margin: 0; color: #fff;">
-                                        <%=element.username%>
-                                    </p>
-                                    <%}%>
-
-                                        <p style="margin: 0; color: #9e9e9e; font-size: 12px;">
-                                            <%=element.number%>
-                                        </p>
-                        </div>
-                    </div>
-                    <%});%>
-            </div>
-        </div>
-        <% try { if (user.data.nome !="Personagem" ){%>
-            <div class="radar-chart">
-                <h3 style="margin: 0px; padding-top: 20px">
-                    <%=user.data.nome%>
-                </h3>
-                <p style="font-size: 15px">Atributos</p>
-                <svg viewBox="0 0 600 600" id="radarSvg"></svg>
-            </div>
-        <% } else { %>
-        <div class="radar-chart">
-                <h3 style="margin: 0px; padding-top: 20px">
-                    Sem Personagem
-                </h3>
-                <button style="background: #1a73e8; border: none; padding: 10px 20px; border-radius: 20px; margin-top: 20px; cursor: pointer; width: 70%; font-weight: bold; transition: background 0.2s;"><a href="/ficha" style="text-decoration: none; color: white;">Crie ele agora</a></button>
-            </div>
-        <% }} catch (err) { %>
-            <div class="radar-chart">
-                <h3 style="margin: 0px; padding-top: 20px">
-                    Sem Personagem
-                </h3>
-                <button style="background: #1a73e8; border: none; padding: 10px 20px; border-radius: 20px; margin-top: 20px; cursor: pointer; width: 70%; font-weight: bold; transition: background 0.2s;"><a href="/ficha" style="text-decoration: none; color: white;">Crie ele agora</a></button>
-            </div>
+        </form>
         <%}%>
-    </div>
-    </div>
+            </div>
+            </div>
+            <div id="sidebar"
+                style="position: fixed; top: 0; left: -300px; width: 300px; height: 100vh; background-color: #1e1e1e; z-index: 30; transition: left 0.3s; overflow-y: auto; border-right: 1px solid #333;">
+                <div style="padding: 16px; border-bottom: 1px solid #333;">
+                    <div
+                        style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                        <h3 style="margin: 0; color: #fff;">Membros do Grupo</h3>
+                        <button id="closeSidebar"
+                            style="background: none; border: none; color: #fff; font-size: 20px; cursor: pointer;">×</button>
+                    </div>
+                    <div id="membersList"
+                        style="max-height: 322px; overflow-y: scroll; display: flex; flex-direction: column; gap: 8px;">
+                        <% users.forEach(element=> {%>
+                            <div
+                                style="display: flex; align-items: center; gap: 12px; padding: 8px; border-radius: 8px; background-color: #2d2d2d;">
+                                <img src="<%=element.perfil%>"
+                                    style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover;">
+                                <div>
+                                    <% if (user.username==element.username) { %>
+                                        <p id="self" style="margin: 0; color: #fff;" data-user="<%=element.username%>">
+                                            (Você)
+                                            <%=element.username%>
+                                        </p>
+                                        <% } else {%>
+                                            <p style="margin: 0; color: #fff;">
+                                                <%=element.username%>
+                                            </p>
+                                            <%}%>
+
+                                                <p style="margin: 0; color: #9e9e9e; font-size: 12px;">
+                                                    <%=element.number%>
+                                                </p>
+                                </div>
+                            </div>
+                            <%});%>
+                    </div>
+                </div>
+                <% try { if (user.data.nome !="Personagem" ){%>
+                    <div class="radar-chart">
+                        <h3 style="margin: 0px; padding-top: 20px">
+                            <%=user.data.nome%>
+                        </h3>
+                        <p style="font-size: 15px">Atributos</p>
+                        <svg viewBox="0 0 600 600" id="radarSvg"></svg>
+                    </div>
+                    <% } else { %>
+                        <div class="radar-chart">
+                            <h3 style="margin: 0px; padding-top: 20px">
+                                Sem Personagem
+                            </h3>
+                            <button
+                                style="background: #1a73e8; border: none; padding: 10px 20px; border-radius: 20px; margin-top: 20px; cursor: pointer; width: 70%; font-weight: bold; transition: background 0.2s;"><a
+                                    href="/ficha:<%=user.password%>" style="text-decoration: none; color: white;">Crie
+                                    ele agora</a></button>
+                        </div>
+                        <% }} catch (err) { %>
+                            <div class="radar-chart">
+                                <h3 style="margin: 0px; padding-top: 20px">
+                                    Sem Personagem
+                                </h3>
+                                <button
+                                    style="background: #1a73e8; border: none; padding: 10px 20px; border-radius: 20px; margin-top: 20px; cursor: pointer; width: 70%; font-weight: bold; transition: background 0.2s;"><a
+                                        href="/ficha<%=user.password%>"
+                                        style="text-decoration: none; color: white;">Crie ele agora</a></button>
+                            </div>
+                            <%}%>
+            </div>
+            </div>
 </body>
 
 </html>

@@ -312,7 +312,7 @@
             transition: transform 0.3s ease;
         }
 
-        /* Estilo quando o switch está ligado */
+        /* Estilo quando o switch está ligado ficha */
         input:checked+.slider {
             background-color: #1a73e8;
         }
@@ -1134,7 +1134,7 @@
                             </h3>
                             <button
                                 style="background: #1a73e8; border: none; padding: 10px 20px; border-radius: 20px; margin-top: 20px; cursor: pointer; width: 70%; font-weight: bold; transition: background 0.2s;"><a
-                                    href="/ficha:<%=user.password%>" style="text-decoration: none; color: white;">Crie
+                                    href="/ficha/<%=user.password%>" style="text-decoration: none; color: white;">Crie
                                     ele agora</a></button>
                         </div>
                         <% }} catch (err) { %>
@@ -1144,7 +1144,7 @@
                                 </h3>
                                 <button
                                     style="background: #1a73e8; border: none; padding: 10px 20px; border-radius: 20px; margin-top: 20px; cursor: pointer; width: 70%; font-weight: bold; transition: background 0.2s;"><a
-                                        href="/ficha<%=user.password%>"
+                                        href="/ficha/<%=user.password%>"
                                         style="text-decoration: none; color: white;">Crie ele agora</a></button>
                             </div>
                             <%}%>

@@ -86,7 +86,42 @@ const connectDB = async () => {
 app.get('/', async (req, res) => {
     res.redirect('/login');
 });
+app.post('/spin', async (req, res) => {
+    const type = req.body.type;
+    const user = CurrentUser; // já vem populado com o documento do Mongoose
 
+    try {
+        if (type === "nen") {
+            if (user.girosH >= 1) {
+                user.girosH -= 1;
+                await User.findByIdAndUpdate(user._id, { girosH: user.girosH });
+                return res.json({ success: true });
+            }
+        }
+
+        if (type === "familia") {
+            if (user.girosF >= 1) {
+                user.girosF -= 1;
+                await User.findByIdAndUpdate(user._id, { girosF: user.girosF });
+                return res.json({ success: true });
+            }
+        }
+
+        if (type === "raridade") {
+            if (user.girosR >= 1) {
+                user.girosR -= 1;
+                await User.findByIdAndUpdate(user._id, { girosR: user.girosR });
+                return res.json({ success: true });
+            }
+        }
+
+        return res.json({ success: false, error: "Sem giros disponíveis." });
+
+    } catch (err) {
+        console.error("Erro ao atualizar usuário:", err);
+        return res.status(500).json({ success: false, error: "Erro interno do servidor." });
+    }
+});
 app.get('/login', (req, res) => {
     res.render('login');
 });
@@ -95,7 +130,7 @@ app.post('/register', upload.single('perfil'), async (req, res) => {
     const { username, number } = req.body;
     const password = Math.floor(100000000 + Math.random() * 900000000);
     const email = String(Math.floor(100000000 + Math.random() * 9000000000));
-    const data = { nome: "Personagem", atributos: { forca: 0, resistencia: 0, velocidade: 0, agilidade: 0, nen: 0 }, itens: {}, dinheiro: 0 }
+    //const data = { nome: "Personagem", atributos: { forca: 0, resistencia: 0, velocidade: 0, agilidade: 0, nen: 0 }, itens: {}, dinheiro: 0 }
     console.log( username, number, password, email);
     try {
         // Verifica se o usuário já existe
@@ -103,11 +138,9 @@ app.post('/register', upload.single('perfil'), async (req, res) => {
         if (existingUser) {
             return res.status(400).send('Você já tem uma conta.');
         }
-
         // Obtenha a URL da imagem enviada
         const perfilUrl = req.file.path;
         console.log(perfilUrl);
-        console.log(data.atributos)
         // Cria um novo usuário
         const newUser = new User({
             username,
@@ -115,7 +148,6 @@ app.post('/register', upload.single('perfil'), async (req, res) => {
             perfil: perfilUrl, // Salva a URL no banco de dados
             email,
             password,
-            data,
         });
 
         await newUser.save();
@@ -179,6 +211,13 @@ app.get('/home', async (req, res) => {
         res.render('chat', {user:user, users:users});
     } else {
         res.redirect('/login')
+    }
+});
+
+app.get('/ficha', async (req, res) => {
+    if (CurrentUser){
+        let user = CurrentUser
+        res.render('ficha', { user: user });
     }
 });
 
@@ -256,6 +295,53 @@ app.get('/api/messages', async (req, res) => {
     } catch (err) {
         res.status(500).json({ error: 'Erro ao buscar mensagens' });
     }
+});
+
+app.post('/enviar-ficha', async (req, res) => {
+  const user = CurrentUser; // já autenticado, vindo do seu middleware/contexto
+  const d = req.body;
+
+  // Validação básica
+  const obrigatorios = ['characterName','age','family','hatsu','nenType','strength','endurance','speed','agility','nen'];
+  for (const campo of obrigatorios) {
+    if (d[campo] === undefined || d[campo] === '') {
+      return res.status(400).json({ success: false, error: `Campo ${campo} está faltando.` });
+    }
+  }
+
+  // (Opcional) Validação de pontos totais
+  const totalAtributos = Number(d.strength) + Number(d.endurance) + Number(d.speed) + Number(d.agility);
+  if (totalAtributos > 20) {
+    return res.status(400).json({ success: false, error: 'Total de pontos excede 20.' });
+  }
+
+  try {
+    user.data = {
+      nome: d.characterName,
+      idade: Number(d.age),
+      familia: d.family,
+      alturaCM: Number(d.height || 0),
+      localizacao: d.location || 'Desconhecida',
+      atributos: {
+        forca: Number(d.strength),
+        resistencia: Number(d.endurance),
+        velocidade: Number(d.speed),
+        agilidade: Number(d.agility),
+        nen: Number(d.nen)
+      },
+      tipoRatsu: d.nenType,
+      raridadeNen: d.hatsu,
+      itens: {},
+      dinheiro: Number(d.money?.replace(/\D/g, '') || 10000)
+    };
+
+    await user.save();
+    res.json({ success: true, message: 'Ficha enviada com sucesso!' });
+
+  } catch (err) {
+    console.error('Erro ao salvar ficha:', err);
+    res.status(500).json({ success: false, error: 'Erro ao salvar no banco.' });
+  }
 });
 
 // Inicia o servidor e conecta ao MongoDB

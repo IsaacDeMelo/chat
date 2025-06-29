@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Formulário de Personagem</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap');
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #f5f5f5;
+        }
+
+        .input-focus-effect:focus {
+            box-shadow: 0 0 0 2px #1a73e8;
+            border-color: transparent;
+        }
+
+        .btn-hover-effect:hover {
+            background-color: #1557b0;
+            transform: translateY(-1px);
+        }
+
+        .btn-active-effect:active {
+            transform: translateY(0);
+        }
+
+        .common-family {
+            color: #1e40af;
+            background-color: #dbeafe;
+        }
+
+        .epic-family {
+            color: #6b21a8;
+            background-color: #f3e8ff;
+        }
+
+        .legendary-family {
+            color: #9a3412;
+            background-color: #fee2e2;
+        }
+
+        .historic-family {
+            color: #166534;
+            background-color: #dcfce7;
+        }
+
+        /* Reset style when spinning */
+        .spinning-family {
+            color: #1f2937;
+            background-color: #f9fafb;
+        }
+    </style>
+</head>
+
+<body class="min-h-screen flex items-center justify-center p-4">
+    <div class="w-full max-w-md">
+        <div class="bg-white rounded-xl shadow-lg overflow-hidden">
+            <!-- Header -->
+            <div class="bg-[#1e1e1e] p-6">
+                <div class="flex items-center justify-between">
+                    <h1 class="text-2xl font-semibold text-white">Novo Personagem</h1>
+                    <i class="fas fa-scroll text-[#1a73e8] text-3xl"></i>
+                </div>
+                <p class="text-gray-300 mt-1 text-sm">Preencha os detalhes do seu personagem</p>
+            </div>
+
+            <!-- Form -->
+            <form class="p-6 space-y-5">
+                <!-- Character Name -->
+                <div class="space-y-2">
+                    <label for="characterName" class="block text-sm font-medium text-gray-700">
+                        Nome do Personagem <span class="text-red-500">*</span>
+                    </label>
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <i class="fas fa-user text-gray-400"></i>
+                        </div>
+                        <input type="text" id="characterName" name="characterName" required
+                            class="pl-10 block w-full rounded-lg border-gray-300 shadow-sm input-focus-effect py-3 px-4 border focus:outline-none transition duration-200"
+                            placeholder="Ex: Aragorn, Geralt, etc.">
+                    </div>
+                </div>
+
+                <!-- Family Spin -->
+                <div class="space-y-2">
+                    <label class="block text-sm font-medium text-gray-700">
+                        Família <span class="text-red-500">*</span>
+                    </label>
+                    <div class="flex gap-2">
+                        <div class="relative flex-1">
+                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                <i class="fas fa-users text-gray-400"></i>
+                            </div>
+                            <input type="text" id="family" name="family" readonly
+                                class="pl-10 block w-full rounded-lg border-gray-300 shadow-sm bg-gray-50 py-3 px-4 border transition-colors duration-200"
+                                placeholder="Clique para sortear">
+                        </div>
+                        <button type="button" id="spinFamily"
+                            class="flex-shrink-0 inline-flex items-center justify-center w-12 h-12 rounded-lg bg-[#1a73e8] text-white hover:bg-[#1557b0] transition duration-200"
+                            title="Sortear Família">
+                            <i class="fas fa-random"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Hatsu Spin -->
+                <div class="space-y-2">
+                    <label class="block text-sm font-medium text-gray-700">
+                        Raridade do Nen <span class="text-red-500">*</span>
+                    </label>
+                    <div class="flex gap-2">
+                        <div class="relative flex-1">
+                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                <i class="fas fa-fire text-gray-400"></i>
+                            </div>
+                            <input type="text" id="hatsu" name="hatsu" readonly
+                                class="pl-10 block w-full rounded-lg border-gray-300 shadow-sm bg-gray-50 py-3 px-4 border transition-colors duration-200"
+                                placeholder="Clique para sortear">
+                        </div>
+                        <button type="button" id="spinHatsu"
+                            class="flex-shrink-0 inline-flex items-center justify-center w-12 h-12 rounded-lg bg-[#1a73e8] text-white hover:bg-[#1557b0] transition duration-200"
+                            title="Sortear Hatsu">
+                            <i class="fas fa-random"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Nen Type Spin -->
+                <div class="space-y-2">
+                    <label class="block text-sm font-medium text-gray-700">
+                        Tipo de Nen <span class="text-red-500">*</span>
+                    </label>
+                    <div class="flex gap-2">
+                        <div class="relative flex-1">
+                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                <i class="fas fa-star text-gray-400"></i>
+                            </div>
+                            <input type="text" id="nenType" name="nenType" readonly
+                                class="pl-10 block w-full rounded-lg border-gray-300 shadow-sm bg-gray-50 py-3 px-4 border transition-colors duration-200"
+                                placeholder="Clique para sortear">
+                        </div>
+                        <button type="button" id="spinNenType"
+                            class="flex-shrink-0 inline-flex items-center justify-center w-12 h-12 rounded-lg bg-[#1a73e8] text-white hover:bg-[#1557b0] transition duration-200"
+                            title="Sortear Tipo de Nen">
+                            <i class="fas fa-random"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Money -->
+                <div class="space-y-2">
+                    <label for="money" class="block text-sm font-medium text-gray-700">
+                        Dinheiro
+                    </label>
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <i class="fas fa-coins text-gray-400"></i>
+                        </div>
+                        <input type="text" id="money" name="money" readonly value="10.000"
+                            class="pl-10 block w-full rounded-lg border-gray-300 shadow-sm bg-gray-50 py-3 px-4 border transition-colors duration-200">
+                    </div>
+                </div>
+
+                <!-- Age -->
+                <div class="space-y-2">
+                    <label for="age" class="block text-sm font-medium text-gray-700">
+                        Idade
+                    </label>
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <i class="fas fa-birthday-cake text-gray-400"></i>
+                        </div>
+                        <input type="number" id="age" name="age" min="0"
+                            class="pl-10 block w-full rounded-lg border-gray-300 shadow-sm py-3 px-4 border input-focus-effect focus:outline-none transition duration-200"
+                            placeholder="Idade do personagem">
+                    </div>
+                </div>
+
+                <!-- Appearance -->
+                <div class="space-y-2">
+                    <label for="appearance" class="block text-sm font-medium text-gray-700">
+                        Aparência (Personagem e Obra)
+                    </label>
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <i class="fas fa-user-tie text-gray-400"></i>
+                        </div>
+                        <input type="text" id="appearance" name="appearance"
+                            class="pl-10 block w-full rounded-lg border-gray-300 shadow-sm py-3 px-4 border input-focus-effect focus:outline-none transition duration-200"
+                            placeholder="Ex: Goku (Dragon Ball)">
+                    </div>
+                </div>
+
+                <!-- Attributes -->
+                <div class="space-y-2">
+                    <label class="block text-sm font-medium text-gray-700">
+                        Atributos (20 pontos totais)
+                    </label>
+                    <div class="space-y-3">
+                        <div class="flex items-center">
+                            <label class="w-24 text-sm">Força:</label>
+                            <input type="number" id="strength" name="strength" min="0" max="20" value="0"
+                                class="attribute-input flex-1 rounded-lg border-gray-300 shadow-sm py-2 px-3 border input-focus-effect">
+                        </div>
+                        <div class="flex items-center">
+                            <label class="w-24 text-sm">Resistência:</label>
+                            <input type="number" id="endurance" name="endurance" min="0" max="20" value="0"
+                                class="attribute-input flex-1 rounded-lg border-gray-300 shadow-sm py-2 px-3 border input-focus-effect">
+                        </div>
+                        <div class="flex items-center">
+                            <label class="w-24 text-sm">Velocidade:</label>
+                            <input type="number" id="speed" name="speed" min="0" max="20" value="0"
+                                class="attribute-input flex-1 rounded-lg border-gray-300 shadow-sm py-2 px-3 border input-focus-effect">
+                        </div>
+                        <div class="flex items-center">
+                            <label class="w-24 text-sm">Agilidade:</label>
+                            <input type="number" id="agility" name="agility" min="0" max="20" value="0"
+                                class="attribute-input flex-1 rounded-lg border-gray-300 shadow-sm py-2 px-3 border input-focus-effect">
+                        </div>
+                        <div class="flex items-center">
+                            <label class="w-24 text-sm">Nen:</label>
+                            <div class="relative flex-1">
+                                <input type="number" id="nen" name="nen" value="0" readonly
+                                    class="block w-full rounded-lg border-gray-300 shadow-sm bg-gray-50 py-2 px-3 border">
+                                <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                                    <i class="fas fa-lock text-gray-400"></i>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="pt-2 text-sm text-gray-600">
+                            Pontos restantes: <span id="remaining-points">20</span>/20
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Submit Button -->
+                <div class="pt-2">
+                    <button type="submit"
+                        class="w-full flex justify-center items-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-[#1a73e8] hover:bg-[#1557b0] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#1a73e8] transition duration-200 btn-hover-effect btn-active-effect">
+                        <i class="fas fa-plus-circle mr-2"></i>
+                        Criar Personagem
+                    </button>
+                </div>
+            </form>
+
+            <!-- Footer -->
+            <div class="bg-gray-50 px-6 py-4 border-t border-gray-200">
+                <p class="text-xs text-gray-500 text-center">
+                    Todos os direitos reservados &copy; 2023
+                </p>
+            </div>
+        </div>
+    </div>
+    <script>
+document.addEventListener('DOMContentLoaded', () => {
+    document.getElementById('characterName').focus();
+    const familyInput = document.getElementById('family');
+    const hatsuInput = document.getElementById('hatsu');
+    const nenTypeInput = document.getElementById('nenType');
+    const form = document.querySelector('form');
+
+    // Recuperar valores do localStorage
+    const savedFamily = localStorage.getItem('familia_sorteada');
+    const savedHatsu = localStorage.getItem('raridade_sorteada');
+    const savedNen = localStorage.getItem('nen_sorteado');
+
+    if (savedFamily) familyInput.value = savedFamily;
+    if (savedHatsu) hatsuInput.value = savedHatsu;
+    if (savedNen) nenTypeInput.value = savedNen;
+
+
+    const classListReset = (el) => {
+        el.classList.remove('common-family', 'epic-family', 'legendary-family', 'historic-family', 'spinning-family');
+    };
+
+    // ==== FAMILY ====
+    const spinFamilyBtn = document.getElementById('spinFamily');
+    const families = [
+        ...Array(65).fill(['Ferrier', 'Miyazawa', 'Eralith']).flat(),
+        ...Array(25).fill(['Nostrade', 'Kurta']).flat(),
+        ...Array(10).fill(['Zoldyck', 'Kakin', 'Uzuki']).flat(),
+        ...Array(1).fill(['Freecs', 'Netero', 'Ryusegai']).flat()
+    ];
+    const familyRarityMap = {
+        Ferrier: 'common-family',
+        Miyazawa: 'common-family',
+        Eralith: 'common-family',
+        Nostrade: 'epic-family',
+        Kurta: 'epic-family',
+        Zoldyck: 'legendary-family',
+        Kakin: 'legendary-family',
+        Uzuki: 'legendary-family',
+        Freecs: 'historic-family',
+        Netero: 'historic-family',
+        Ryusegai: 'historic-family'
+    };
+
+    spinFamilyBtn.addEventListener('click', async () => {
+        const response = await fetch('/spin', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ type: 'familia' })
+        });
+
+        const data = await response.json();
+        if (!data.success) return;
+
+        spinFamilyBtn.disabled = true;
+        familyInput.value = 'Girando...';
+        classListReset(familyInput);
+        familyInput.classList.add('spinning-family');
+
+        let count = 0;
+        const interval = setInterval(() => {
+            const rand = families[Math.floor(Math.random() * families.length)];
+            familyInput.value = rand;
+            count++;
+            if (count > 20) {
+                clearInterval(interval);
+                const final = families[Math.floor(Math.random() * families.length)];
+                familyInput.value = final;
+                localStorage.setItem('familia_sorteada', final);
+                classListReset(familyInput);
+                familyInput.classList.add(familyRarityMap[final]);
+                spinFamilyBtn.disabled = false;
+            }
+        }, 150);
+    });
+
+    // ==== HATSU final ====
+    const spinHatsuBtn = document.getElementById('spinHatsu');
+    const hatsuRarities = [
+        ...Array(70).fill(['1 em 100k', '1 em 500k', '1 em 1M', '1 em 10M']).flat(),
+        ...Array(20).fill(['1 em 100M', '1 em 250M', '1 em 500M']).flat(),
+        ...Array(10).fill(['1 em 750M', '1 em 1B']).flat()
+    ];
+    const hatsuRarityMap = {
+        '1 em 100k': 'common-family',
+        '1 em 500k': 'common-family',
+        '1 em 1M': 'common-family',
+        '1 em 10M': 'common-family',
+        '1 em 100M': 'epic-family',
+        '1 em 250M': 'epic-family',
+        '1 em 500M': 'epic-family',
+        '1 em 750M': 'legendary-family',
+        '1 em 1B': 'legendary-family'
+    };
+
+    spinHatsuBtn.addEventListener('click', async () => {
+        const response = await fetch('/spin', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ type: 'raridade' })
+        });
+
+        const data = await response.json();
+        if (!data.success) return;
+
+        spinHatsuBtn.disabled = true;
+        hatsuInput.value = 'Girando...';
+        classListReset(hatsuInput);
+        hatsuInput.classList.add('spinning-family');
+
+        let count = 0;
+        const interval = setInterval(() => {
+            const rand = hatsuRarities[Math.floor(Math.random() * hatsuRarities.length)];
+            hatsuInput.value = rand;
+            count++;
+            if (count > 20) {
+                clearInterval(interval);
+                const final = hatsuRarities[Math.floor(Math.random() * hatsuRarities.length)];
+                hatsuInput.value = final;
+                localStorage.setItem('raridade_sorteada', final);
+                classListReset(hatsuInput);
+                hatsuInput.classList.add(hatsuRarityMap[final]);
+                spinHatsuBtn.disabled = false;
+            }
+        }, 150);
+    });
+
+    // ==== NEN TYPE ====
+    const spinNenTypeBtn = document.getElementById('spinNenType');
+    const nenTypes = [
+        ...Array(30).fill('Aprimoramento'),
+        ...Array(30).fill('Transmutação'),
+        ...Array(30).fill('Emissão'),
+        ...Array(8).fill('Manipulação'),
+        ...Array(8).fill('Conjuração'),
+        ...Array(4).fill('Especialização')
+    ];
+    const nenTypeRarityMap = {
+        'Aprimoramento': 'common-family',
+        'Transmutação': 'common-family',
+        'Emissão': 'common-family',
+        'Manipulação': 'epic-family',
+        'Conjuração': 'epic-family',
+        'Especialização': 'legendary-family'
+    };
+
+    spinNenTypeBtn.addEventListener('click', async () => {
+        const response = await fetch('/spin', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ type: 'nen' })
+        });
+
+        const data = await response.json();
+        if (!data.success) return;
+
+        spinNenTypeBtn.disabled = true;
+        nenTypeInput.value = 'Girando...';
+        classListReset(nenTypeInput);
+        nenTypeInput.classList.add('spinning-family');
+
+        let count = 0;
+        const interval = setInterval(() => {
+            const rand = nenTypes[Math.floor(Math.random() * nenTypes.length)];
+            nenTypeInput.value = rand;
+            count++;
+            if (count > 20) {
+                clearInterval(interval);
+                const final = nenTypes[Math.floor(Math.random() * nenTypes.length)];
+                nenTypeInput.value = final;
+                localStorage.setItem('nen_sorteado', final);
+                classListReset(nenTypeInput);
+                nenTypeInput.classList.add(nenTypeRarityMap[final]);
+                spinNenTypeBtn.disabled = false;
+            }
+        }, 150);
+    });
+
+    // ==== ATRIBUTOS ====
+    const attributeInputs = document.querySelectorAll('.attribute-input');
+    const remainingPointsSpan = document.getElementById('remaining-points');
+    const totalPoints = 20;
+
+    function updatePoints() {
+        let used = 0;
+        attributeInputs.forEach(input => used += parseInt(input.value) || 0);
+        const remaining = totalPoints - used;
+        remainingPointsSpan.textContent = remaining;
+
+        if (remaining < 0) {
+            remainingPointsSpan.classList.add('text-red-500');
+            alert('Você excedeu o limite de 20 pontos!');
+        } else {
+            remainingPointsSpan.classList.remove('text-red-500');
+        }
+
+        attributeInputs.forEach(input => {
+            const current = parseInt(input.value) || 0;
+            input.disabled = remaining <= 0 && current === 0;
+        });
+    }
+
+    attributeInputs.forEach(input => {
+        input.addEventListener('input', updatePoints);
+        input.addEventListener('change', updatePoints);
+    });
+});
+document.addEventListener('DOMContentLoaded', () => {
+  const form = document.querySelector('form');
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    const data = {
+      characterName: form.characterName.value,
+      age: form.age.value,
+      family: form.family.value,
+      hatsu: form.hatsu.value,
+      nenType: form.nenType.value,
+      money: form.money.value,
+      strength: form.strength.value,
+      endurance: form.endurance.value,
+      speed: form.speed.value,
+      agility: form.agility.value,
+      nen: form.nen.value
+    };
+
+    try {
+      const resp = await fetch('/enviar-ficha', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+      });
+
+      const result = await resp.json();
+
+      if (result.success) {
+        alert('Personagem criado com sucesso!');
+        form.reset();
+      } else {
+        alert('Erro: ' + (result.error || 'Falha ao criar.'));
+      }
+    } catch (err) {
+      console.error(err);
+      alert('Erro inesperado.');
+    }
+  });
+});
+</script>
+
+</body>
+
+</html>

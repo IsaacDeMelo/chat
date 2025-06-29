@@ -39,7 +39,7 @@ const io = new Server(server); // Adiciona o WebSocket ao servidor
 // Conexão WebSocket
 io.on('connection', (socket) => {
     console.log('Novo cliente conectado');
-    
+
     socket.on('requestMessages', () => {
         Message.find()
             .then((messages) => {
@@ -132,7 +132,7 @@ app.post('/register', upload.single('perfil'), async (req, res) => {
     const password = Math.floor(100000000 + Math.random() * 900000000);
     const email = String(Math.floor(100000000 + Math.random() * 9000000000));
     //const data = { nome: "Personagem", atributos: { forca: 0, resistencia: 0, velocidade: 0, agilidade: 0, nen: 0 }, itens: {}, dinheiro: 0 }
-    console.log( username, number, password, email);
+    console.log(username, number, password, email);
     try {
         // Verifica se o usuário já existe
         const existingUser = await User.findOne({ number });
@@ -166,7 +166,7 @@ app.get('/register', (req, res) => {
 
 app.post('/login', async (req, res) => {
     const { number } = req.body;
-    console.log( number );
+    console.log(number);
     const user = await User.findOne({ number });
     console.log(user);
     try {
@@ -207,10 +207,10 @@ app.post('/api/login', async (req, res) => {
 app.get('/home/:id', async (req, res) => {
     let userPassword = req.params.id;
     let user = await User.findOne({ password: userPassword });
-    if (user){
+    if (user) {
         let users = await User.find({});
         console.log(users);
-        res.render('chat', {user:user, users:users});
+        res.render('chat', { user: user, users: users });
     } else {
         res.redirect('/login')
     }
@@ -245,36 +245,36 @@ app.post('/api/messages', upload.single('image'), async (req, res) => {
 
     // Verifica se é um comando /dado
     if (/^\/dado/i.test(texto)) {
-    const nomesBrutos = texto.replace(/^\/dado\s*/i, ''); // remove "/dado" + espaços iniciais
-    const lista = nomesBrutos
-        .split(',')
-        .map(n => n.trim())
-        .filter(n => n.length > 0);
+        const nomesBrutos = texto.replace(/^\/dado\s*/i, ''); // remove "/dado" + espaços iniciais
+        const lista = nomesBrutos
+            .split(',')
+            .map(n => n.trim())
+            .filter(n => n.length > 0);
 
-    if (lista.length === 0) {
-        return res.status(400).json({ error: 'Nenhum nome informado no comando /dado.' });
+        if (lista.length === 0) {
+            return res.status(400).json({ error: 'Nenhum nome informado no comando /dado.' });
+        }
+
+        const linhas = lista.map(nome => {
+            const numero = Math.floor(Math.random() * 21);
+            return `${nome} tirou ${numero} no dado 🎲`;
+        });
+
+        const textoFinal = linhas.join('\n');
+
+        const dadoMessage = new Message({
+            usuario: 'Dado',
+            texto: textoFinal,
+            foto: 'https://i.pinimg.com/736x/ee/51/73/ee5173dd81b2abc23de6df5a5b671548.jpg',
+            created,
+            imageUrl: null
+        });
+
+        await dadoMessage.save();
+        notifyClients();
+
+        return res.status(201).json(dadoMessage);
     }
-
-    const linhas = lista.map(nome => {
-        const numero = Math.floor(Math.random() * 21);
-        return `${nome} tirou ${numero} no dado 🎲`;
-    });
-
-    const textoFinal = linhas.join('\n');
-
-    const dadoMessage = new Message({
-        usuario: 'Dado',
-        texto: textoFinal,
-        foto: 'https://i.pinimg.com/736x/ee/51/73/ee5173dd81b2abc23de6df5a5b671548.jpg',
-        created,
-        imageUrl: null
-    });
-
-    await dadoMessage.save();
-    notifyClients();
-
-    return res.status(201).json(dadoMessage);
-}
 
     // Caso seja uma mensagem comum
     try {
@@ -309,51 +309,56 @@ app.get('/api/messages', async (req, res) => {
 });
 
 app.post('/enviar-ficha/:id', async (req, res) => {
-  let userPassword = req.params.id;
-  let user = await User.findOne({ password: userPassword });
-  const d = req.body;
+    let userPassword = req.params.id;
+    let user = await User.findOne({ password: userPassword });
+    const d = req.body;
 
-  // Validação básica
-  const obrigatorios = ['characterName','age','family','hatsu','nenType','strength','endurance','speed','agility','nen'];
-  for (const campo of obrigatorios) {
-    if (d[campo] === undefined || d[campo] === '') {
-      return res.status(400).json({ success: false, error: `Campo ${campo} está faltando.` });
+    // Validação básica
+    const obrigatorios = ['characterName', 'age', 'family', 'hatsu', 'nenType', 'strength', 'endurance', 'speed', 'agility', 'nen'];
+    for (const campo of obrigatorios) {
+        if (d[campo] === undefined || d[campo] === '') {
+            return res.status(400).json({ success: false, error: `Campo ${campo} está faltando.` });
+        }
     }
-  }
+    const familia = user.data.familia
+    if (familia == "Nostrade") {
+        d.money = 20000
+    } else if (familia == "Kakin") {
+        d.money = 40000
+    }
+    // (Opcional) Validação de pontos totais
+    const totalAtributos = Number(d.strength) + Number(d.endurance) + Number(d.speed) + Number(d.agility);
+    if (totalAtributos > 20) {
+        return res.status(400).json({ success: false, error: 'Total de pontos excede 20.' });
+    }
 
-  // (Opcional) Validação de pontos totais
-  const totalAtributos = Number(d.strength) + Number(d.endurance) + Number(d.speed) + Number(d.agility);
-  if (totalAtributos > 20) {
-    return res.status(400).json({ success: false, error: 'Total de pontos excede 20.' });
-  }
+    try {
+        user.data = {
+            nome: d.characterName,
+            idade: Number(d.age),
+            familia: d.family,
+            alturaCM: Number(d.height || 0),
+            localizacao: d.location || 'Desconhecida',
+            atributos: {
+                forca: Number(d.strength),
+                resistencia: Number(d.endurance),
+                velocidade: Number(d.speed),
+                agilidade: Number(d.agility),
+                nen: Number(d.nen)
+            },
+            tipoRatsu: d.nenType,
+            raridadeNen: d.hatsu,
+            itens: {},
+            dinheiro: Number(d.money?.replace(/\D/g, '') || 10000)
+        };
 
-  try {
-    user.data = {
-      nome: d.characterName,
-      idade: Number(d.age),
-      familia: d.family,
-      alturaCM: Number(d.height || 0),
-      localizacao: d.location || 'Desconhecida',
-      atributos: {
-        forca: Number(d.strength),
-        resistencia: Number(d.endurance),
-        velocidade: Number(d.speed),
-        agilidade: Number(d.agility),
-        nen: Number(d.nen)
-      },
-      tipoRatsu: d.nenType,
-      raridadeNen: d.hatsu,
-      itens: {},
-      dinheiro: Number(d.money?.replace(/\D/g, '') || 10000)
-    };
+        await user.save();
+        res.json({ success: true })
 
-    await user.save();
-    res.json({ success: true })
-    
-  } catch (err) {
-    console.error('Erro ao salvar ficha:', err);
-    res.status(500).json({ success: false, error: 'Erro ao salvar no banco.' });
-  }
+    } catch (err) {
+        console.error('Erro ao salvar ficha:', err);
+        res.status(500).json({ success: false, error: 'Erro ao salvar no banco.' });
+    }
 });
 
 // Inicia o servidor e conecta ao MongoDB

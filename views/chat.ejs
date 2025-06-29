@@ -441,12 +441,29 @@
             // eslint-disable-next-line
             try {
                 const personagem = JSON.parse(document.getElementById('usuario-data').textContent)
+                if (personagem.data.familia == "Zoldyck") {
+                    personagem.data.atributo.forca += personagem.data.atribute.forca * 1.10
+                    personagem.data.atributo.velocidade += personagem.data.atributo.velocidade * 1.15
+                } else if (personagem.data.familia == "Uzuki") {
+                    personagem.data.atributo.forca += personagem.data.atributo.forca * 1.10
+                    personagem.data.atributo.velocidade += personagem.data.atributo.velocidade * 1.10
+                } else if (personagem.data.familia == "Freecs") {
+                    personagem.data.atributo.forca += personagem.data.atributo.forca * 1.25
+                    personagem.data.atributo.resistencia += personagem.data.atributo.resistencia * 1.25
+                } else if (personagem.data.familia == "Netero") {
+                    personagem.data.atributo.forca += personagem.data.atributo.forca * 1.20
+                    personagem.data.atributo.resistencia += personagem.data.atributo.resistencia * 1.20
+                } else if (personagem.data.familia == "Ryusegai") {
+                    personagem.data.atributo.forca += personagem.data.atributo.forca * 1.20
+                    personagem.data.atributo.velocidade += personagem.data.atributo.velocidade * 1.15
+                    personagem.data.atributo.resistencia += personagem.data.atributo.resistencia * 1.10
+                }
                 const attributes = {
-                    F: personagem.data.atributos.forca,  // Força
-                    R: personagem.data.atributos.resistencia,  // Resistência
-                    V: personagem.data.atributos.velocidade,  // Velocidade
-                    A: personagem.data.atributos.agilidade,  // Agilidade
-                    N: personagem.data.atributos.nen   // Nen
+                    F: Math.round(personagem.data.atributos.forca),         // Força
+                    R: Math.round(personagem.data.atributos.resistencia),   // Resistência
+                    V: Math.round(personagem.data.atributos.velocidade),    // Velocidade
+                    A: Math.round(personagem.data.atributos.agilidade),     // Agilidade
+                    N: Math.round(personagem.data.atributos.nen)            // Nen
                 };
                 const colors = {
                     F: '#FF4C4C',  // vermelho
@@ -1122,7 +1139,8 @@
                 <% try { if (user.data.nome !="Personagem" ){%>
                     <div class="radar-chart">
                         <h3 style="margin: 0px; padding-top: 20px">
-                            <%=user.data.nome%> <%=user.data.familia%>
+                            <%=user.data.nome%>
+                                <%=user.data.familia%>
                         </h3>
                         <p style="font-size: 15px">Atributos</p>
                         <svg viewBox="0 0 600 600" id="radarSvg"></svg>

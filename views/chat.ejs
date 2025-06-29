@@ -466,11 +466,11 @@
                     personagem.data.atributos.resistencia = personagem.data.atributos.resistencia * 1.10
                 }
                 const attributes = {
-                    F: Math.round(personagem.data.atributos.forca),         // Força
-                    R: Math.round(personagem.data.atributos.resistencia),   // Resistência
-                    V: Math.round(personagem.data.atributos.velocidade),    // Velocidade
-                    A: Math.round(personagem.data.atributos.agilidade),     // Agilidade
-                    N: Math.round(personagem.data.atributos.nen)            // Nen
+                    F: parseFloat(personagem.data.atributos.forca.toFixed(1)),         // Força
+                    R: parseFloat(personagem.data.atributos.resistencia.toFixed(1)),   // Resistência
+                    V: parseFloat(personagem.data.atributos.velocidade.toFixed(1)),    // Velocidade
+                    A: parseFloat(personagem.data.atributos.agilidade.toFixed(1)),     // Agilidade
+                    N: parseFloat(personagem.data.atributos.nen.toFixed(1))            // Nen
                 };
                 const colors = {
                     F: '#FF4C4C',  // vermelho

@@ -282,9 +282,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const spinFamilyBtn = document.getElementById('spinFamily');
     const families = [
         ...Array(40).fill(['Normal']).flat(),
-        ...Array(30).fill(['Ferrier', 'Miyazawa', 'Eralith']).flat(),
-        ...Array(20).fill(['Nostrade', 'Kurta']).flat(),
-        ...Array(10).fill(['Zoldyck', 'Kakin', 'Uzuki']).flat(),
+        ...Array(30).fill(['Ferrier', 'Eralith']).flat(),
+        ...Array(20).fill(['Nostrade', 'Kakin', 'Miyazawa']).flat(),
+        ...Array(10).fill(['Zoldyck', 'Kurta', 'Uzuki']).flat(),
         ...Array(1).fill(['Freecs', 'Netero', 'Ryusegai']).flat()
     ];
     const familyRarityMap = {
@@ -293,9 +293,9 @@ document.addEventListener('DOMContentLoaded', () => {
         Miyazawa: 'common-family',
         Eralith: 'common-family',
         Nostrade: 'epic-family',
-        Kurta: 'epic-family',
+        Kakin: 'epic-family',
         Zoldyck: 'legendary-family',
-        Kakin: 'legendary-family',
+        Kurta: 'legendary-family',
         Uzuki: 'legendary-family',
         Freecs: 'historic-family',
         Netero: 'historic-family',

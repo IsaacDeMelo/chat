@@ -281,14 +281,14 @@ document.addEventListener('DOMContentLoaded', () => {
     // ==== FAMILY ====
     const spinFamilyBtn = document.getElementById('spinFamily');
     const families = [
-        ...Array(40).fill(['Normal']).flat(),
+        ...Array(40).fill(['Exilado']).flat(),
         ...Array(30).fill(['Ferrier', 'Eralith']).flat(),
         ...Array(20).fill(['Nostrade', 'Kakin', 'Miyazawa']).flat(),
         ...Array(10).fill(['Zoldyck', 'Kurta', 'Uzuki']).flat(),
         ...Array(1).fill(['Freecs', 'Netero', 'Ryusegai']).flat()
     ];
     const familyRarityMap = {
-        Normal: 'common-family',
+        Exilado: 'common-family',
         Ferrier: 'common-family',
         Miyazawa: 'common-family',
         Eralith: 'common-family',
@@ -395,7 +395,7 @@ document.addEventListener('DOMContentLoaded', () => {
         ...Array(30).fill('Emissão'),
         ...Array(8).fill('Manipulação'),
         ...Array(8).fill('Conjuração'),
-        ...Array(4).fill('Especialização')
+        ...Array(1).fill('Especialização')
     ];
     const nenTypeRarityMap = {
         'Aprimoramento': 'common-family',

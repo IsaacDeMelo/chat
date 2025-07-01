@@ -86,6 +86,11 @@ const connectDB = async () => {
 app.get('/', async (req, res) => {
     res.redirect('/login');
 });
+app.get('/open-world/:id', async (req, res) => {
+    let userPassword = req.params.id;
+    let user = await User.findOne({ password: userPassword });
+    res.render('open-world', { user: user })
+})
 app.post('/spin/:id', async (req, res) => {
     const type = req.body.type;
     let userPassword = req.params.id;

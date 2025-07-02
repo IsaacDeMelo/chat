@@ -141,7 +141,6 @@ app.post('/register', upload.single('perfil'), async (req, res) => {
     const password = Math.floor(100000000 + Math.random() * 900000000);
     const email = String(Math.floor(100000000 + Math.random() * 9000000000));
     //const data = { nome: "Personagem", atributos: { forca: 0, resistencia: 0, velocidade: 0, agilidade: 0, nen: 0 }, itens: {}, dinheiro: 0 }
-    console.log(username, number, password, email);
     try {
         // Verifica se o usuário já existe
         const existingUser = await User.findOne({ number });
@@ -150,7 +149,6 @@ app.post('/register', upload.single('perfil'), async (req, res) => {
         }
         // Obtenha a URL da imagem enviada
         const perfilUrl = req.file.path;
-        console.log(perfilUrl);
         // Cria um novo usuário
         const newUser = new User({
             username,
@@ -175,9 +173,7 @@ app.get('/register', (req, res) => {
 
 app.post('/login', async (req, res) => {
     const { number } = req.body;
-    console.log(number);
     const user = await User.findOne({ number });
-    console.log(user);
     try {
         //const user = await User.findOne({ username });
         if (!user) {
@@ -197,8 +193,6 @@ app.post('/api/login', async (req, res) => {
     try {
         // Verifica se o número existe no banco de dados
         const user = await User.findOne({ number });
-        console.log(user);
-        console.log(number);
         if (user) {
             CurrentUser = user;
             // Número válido, retorna sucesso
@@ -217,8 +211,6 @@ app.post('/api/loginAdm', async (req, res) => {
     try {
         // Verifica se o número existe no banco de dados
         const user = await User.findOne({ number });
-        console.log(user);
-        console.log(number);
         if (user) {
             CurrentUser = user;
             // Número válido, retorna sucesso
@@ -240,7 +232,6 @@ app.get('/home/:id', async (req, res) => {
     let user = await User.findOne({ password: userPassword });
     if (user) {
         let users = await User.find({});
-        console.log(users);
         res.render('chat', { user: user, users: users });
     } else {
         res.redirect('/login')
@@ -253,7 +244,6 @@ app.get('/adm/:id', async (req, res) => {
         let users = await User.find({});
         let missions = await Mission.find();
         let responses = await Response.find();
-        console.log(users);
         res.render('adm', { user: user, users: users, responses: responses, missions: missions });
     } else {
         res.redirect('/login')
@@ -296,8 +286,7 @@ app.post('/mission-submit', upload.single('imagem'), async (req, res) => {
         });
 
         await newMission.save();
-        console.log('Mensagem salva:', newMission);
-        res.status(201).json(newMission);
+        res.redirect('/loginAdm')
     } catch (err) {
         console.error('Erro ao salvar a missão:', err.message);
         res.status(500).json({ error: 'Erro ao salvar a missão.' });
@@ -312,8 +301,6 @@ app.get('/mission-delete/:id', async (req, res) => {
         if (!missao) {
             return res.status(404).json({ error: 'Missão não encontrada.' });
         }
-
-        console.log('Missão deletada:', missao);
         res.redirect('/loginAdm')
     } catch (err) {
         console.error('Erro ao deletar missão:', err.message);
@@ -334,7 +321,7 @@ app.post('/api/messages', upload.single('image'), async (req, res) => {
 
     // Verifica se é um comando /dado
     if (/^\/dado/i.test(texto)) {
-        const nomesBrutos = texto.replace(/^\/dado\s*/i, ''); // remove "/dado" + espaços iniciais
+        const nomesBrutos = texto.replace(/^\/dado\s*/i, ''); // remove "/dado" + espaços iniciais console.log
         const lista = nomesBrutos
             .split(',')
             .map(n => n.trim())
@@ -376,8 +363,6 @@ app.post('/api/messages', upload.single('image'), async (req, res) => {
         });
 
         await newMessage.save();
-        console.log('Mensagem salva:', newMessage);
-
         notifyClients();
         res.status(201).json(newMessage);
     } catch (err) {

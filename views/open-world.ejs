@@ -6,11 +6,37 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Open-World</title>
     <style>
+        *{
+            box-sizing: border-box;
+        }
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', 'Helvetica Neue', sans-serif;
-            margin: 8px 0 0 0;
+            margin: 0;
             background-color: #2c2c2c;
             color: #fff;
+        }
+
+        .toggle-button {
+            display: block;
+            margin: 0 auto 10px;
+            background: #1c1c1e;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            font-size: 20px;
+            cursor: pointer;
+            transition: transform 0.3s;
+            position: fixed;
+            top: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 1000;
+        }
+
+        .toggle-button.collapsed {
+            transform: rotate(180deg);
         }
 
         .hunter-card {
@@ -18,13 +44,28 @@
             border: none;
             border-radius: 16px;
             text-align: center;
-            width: 75%; 
+            width: 90%;
+            transition: all 0.3s ease;
+            max-height: 1000px;
+            overflow: hidden;
             background: linear-gradient(145deg, #1c1c1e 0%, #2c2c2e 100%);
             box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3);
-            position: relative;
+            position: fixed;
+            top: 60px;
+            left: 50%;
+            transform: translateX(-50%);
             overflow: hidden;
             margin: 0 auto;
             border: 1px solid #333;
+            z-index: 999;
+        }
+
+        .hunter-card.collapsed {
+            max-height: 0;
+            padding: 0;
+            margin: 0;
+            opacity: 0;
+            border: none;
         }
 
         .hunter-card::before {
@@ -81,12 +122,69 @@
             justify-content: left;
             align-items: center;
         }
+
+        .map-container {
+            width: 100%;
+            height: 100vh;
+            overflow: scroll;
+            position: relative;
+            cursor: grab;
+            background: linear-gradient(145deg, #0a1a2e 0%, #1a3a5a 100%);
+            border: 4px solid rgb(44, 44, 44);
+            box-shadow: -1px 2px 0px 3px black
+        }
+
+        #map-image {
+            position: absolute;
+            width: 1200px;
+            height: auto;
+            transform-origin: 0 0;
+            transition: transform 0.1s ease-out;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.7);
+        }
+
+        .navigation-ui {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(30, 30, 30, 0.8);
+            padding: 15px;
+            border-radius: 50px;
+            display: flex;
+            gap: 10px;
+            z-index: 1000;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+            border: 2px solid #5d4037;
+        }
+
+        .nav-button {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: #5d4037;
+            color: white;
+            border: none;
+            font-size: 20px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+
+        .nav-button:hover {
+            background: #8d6e63;
+            transform: scale(1.1);
+        }
+
     </style>
 </head>
 
 <body>
     <div class="main">
-        <div class="hunter-card">
+        <button id="toggle-card" class="toggle-button collapsed">▼</button>
+        <div class="hunter-card collapsed" id="hunter-card">
             <input type="file" id="hunter-image-upload" accept="image/*" style="display: none;">
             <img id="hunter-image" src="" alt="Hunter Image"
                 style="max-width: 150px; max-height: 150px; display: none; cursor: pointer; margin-top: 0px;">
@@ -103,9 +201,125 @@
                 </div>
             </div>
         </div>
+        <div class="map-container" style="width: 100vw; height: 225px;">
+            <img id="map-image" src="/World_Map.webp">
+            <div class="navigation-ui" style="display: none;">
+                <button class="nav-button" id="zoom-in">+</button>
+                <button class="nav-button" id="zoom-out">-</button>
+                <button class="nav-button" id="reset-map">↻</button>
+            </div>
+        </div>
     </div>
+
     <script>
         document.addEventListener('DOMContentLoaded', function () {
+            // Map pan and zoom functionality
+            const mapContainer = document.querySelector('.map-container');
+            const mapImage = document.getElementById('map-image');
+            let isDragging = false;
+            let startPos = { x: 0, y: 0 };
+            let translate = { x: 0, y: 0 };
+            let scale = 1;
+
+            // Pan functionality
+            mapContainer.addEventListener('mousedown', (e) => {
+                isDragging = true;
+                startPos = {
+                    x: e.clientX - translate.x,
+                    y: e.clientY - translate.y
+                };
+                mapContainer.style.cursor = 'grabbing';
+            });
+
+            document.addEventListener('mousemove', (e) => {
+                if (!isDragging) return;
+                translate.x = e.clientX - startPos.x;
+                translate.y = e.clientY - startPos.y;
+                updateMapTransform();
+            });
+
+            document.addEventListener('mouseup', (e) => {
+                isDragging = false;
+                mapContainer.style.cursor = 'grab';
+                
+                // Hide navigation UI when clicking outside map
+                const navUI = document.querySelector('.navigation-ui');
+                if (!mapContainer.contains(e.target)) {
+                    navUI.style.display = 'none';
+                }
+            });
+
+            // Show navigation UI when clicking map
+            mapContainer.addEventListener('click', (e) => {
+                const navUI = document.querySelector('.navigation-ui');
+                if (e.target === mapContainer || e.target === mapImage) {
+                    navUI.style.display = 'flex';
+                }
+            });
+
+            // Zoom functionality
+            mapContainer.addEventListener('wheel', (e) => {
+                e.preventDefault();
+                const zoomIntensity = 0.1;
+                const wheelDelta = e.deltaY < 0 ? 1 : -1;
+                
+                // Calculate new scale with limits
+                const newScale = Math.min(Math.max(0.5, scale + wheelDelta * zoomIntensity), 3);
+                
+                // Calculate mouse position relative to image
+                const rect = mapContainer.getBoundingClientRect();
+                const mouseX = e.clientX - rect.left;
+                const mouseY = e.clientY - rect.top;
+                
+                // Calculate image position before scaling
+                const imageX = mouseX - translate.x;
+                const imageY = mouseY - translate.y;
+                
+                // Calculate new translate values to zoom at mouse position
+                translate.x -= (imageX * newScale / scale) - imageX;
+                translate.y -= (imageY * newScale / scale) - imageY;
+                
+                scale = newScale;
+                updateMapTransform();
+            });
+
+            function updateMapTransform() {
+                mapImage.style.transform = `translate(${translate.x}px, ${translate.y}px) scale(${scale})`;
+            }
+
+            // Reset transform on double click
+            mapContainer.addEventListener('dblclick', () => {
+                translate = { x: 0, y: 0 };
+                scale = 1;
+                updateMapTransform();
+            });
+
+            // Navigation buttons functionality
+            document.getElementById('zoom-in').addEventListener('click', () => {
+                scale = Math.min(3, scale + 0.2);
+                updateMapTransform();
+            });
+
+            document.getElementById('zoom-out').addEventListener('click', () => {
+                scale = Math.max(0.5, scale - 0.2);
+                updateMapTransform();
+            });
+
+            document.getElementById('reset-map').addEventListener('click', () => {
+                translate = { x: 0, y: 0 };
+                scale = 1;
+                updateMapTransform();
+            });
+
+            const toggleButton = document.getElementById('toggle-card');
+            const hunterCard = document.getElementById('hunter-card');
+            
+            toggleButton.addEventListener('click', function() {
+                hunterCard.classList.toggle('collapsed');
+                this.classList.toggle('collapsed');
+                
+            });
+
             const uploadInput = document.getElementById('hunter-image-upload');
             const hunterImage = document.getElementById('hunter-image');
             // Check if image is already saved

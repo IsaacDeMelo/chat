@@ -67,7 +67,7 @@ const notifyClients = () => {
 
 app.set('view engine', 'ejs');
 app.use(express.static(path.join(__dirname, 'public')));
-app.use(express.urlencoded({ extended: true })); // Para processar dados de formulários
+app.use(express.urlencoded({ extended: true })); // Para processar dados de formulários console.log
 // Middleware para interpretar JSON
 app.use(express.json());
 
@@ -165,12 +165,9 @@ app.post('/register', upload.single('perfil'), async (req, res) => {
         res.status(500).send('Erro ao registrar usuário');
     }
 });
-
-
 app.get('/register', (req, res) => {
     res.render('register');
 });
-
 app.post('/login', async (req, res) => {
     const { number } = req.body;
     const user = await User.findOne({ number });
@@ -187,7 +184,6 @@ app.post('/login', async (req, res) => {
         res.status(500).send('Erro ao processar login');
     }
 });
-
 app.post('/api/login', async (req, res) => {
     const { number } = req.body;
     try {
@@ -226,7 +222,6 @@ app.post('/api/loginAdm', async (req, res) => {
         res.status(500).json({ success: false, message: 'Erro no servidor.' });
     }
 });
-
 app.get('/home/:id', async (req, res) => {
     let userPassword = req.params.id;
     let user = await User.findOne({ password: userPassword });
@@ -249,7 +244,6 @@ app.get('/adm/:id', async (req, res) => {
         res.redirect('/login')
     }
 });
-
 app.get('/criar-missao', (req, res) => {
     res.render('./adm/criarMissao.ejs')
 });

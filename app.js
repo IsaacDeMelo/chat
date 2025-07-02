@@ -3,6 +3,8 @@ const util = require('util');
 const mongoose = require('mongoose');
 const dotenv = require('dotenv');
 const Message = require('./models/message.js');
+const Mission = require('./models/mission.js');
+const Response = require('./models/response.js');
 const User = require('./models/user.js');
 const moment = require('moment-timezone');
 const http = require('http');
@@ -131,7 +133,9 @@ app.post('/spin/:id', async (req, res) => {
 app.get('/login', (req, res) => {
     res.render('login');
 });
-
+app.get('/loginAdm', (req, res) => {
+    res.render('loginAdm');
+})
 app.post('/register', upload.single('perfil'), async (req, res) => {
     const { username, number } = req.body;
     const password = Math.floor(100000000 + Math.random() * 900000000);
@@ -208,6 +212,28 @@ app.post('/api/login', async (req, res) => {
         res.status(500).json({ success: false, message: 'Erro no servidor.' });
     }
 });
+app.post('/api/loginAdm', async (req, res) => {
+    const { number } = req.body;
+    try {
+        // Verifica se o número existe no banco de dados
+        const user = await User.findOne({ number });
+        console.log(user);
+        console.log(number);
+        if (user) {
+            CurrentUser = user;
+            // Número válido, retorna sucesso
+            if (user.adm == true){
+                res.redirect(`/adm/${user.password}`)
+            }
+        } else {
+            res.redirect('/register');
+            // Número não encontrado, requer registro
+        }
+    } catch (err) {
+        console.error('Erro ao verificar número:', err.message);
+        res.status(500).json({ success: false, message: 'Erro no servidor.' });
+    }
+});
 
 app.get('/home/:id', async (req, res) => {
     let userPassword = req.params.id;
@@ -219,6 +245,23 @@ app.get('/home/:id', async (req, res) => {
     } else {
         res.redirect('/login')
     }
+});
+app.get('/adm/:id', async (req, res) => {
+    let userPassword = req.params.id;
+    let user = await User.findOne({ password: userPassword });
+    if (user) {
+        let users = await User.find({});
+        let missions = await Mission.find();
+        let responses = await Response.find();
+        console.log(users);
+        res.render('adm', { user: user, users: users, responses: responses, missions: missions });
+    } else {
+        res.redirect('/login')
+    }
+});
+
+app.get('/criar-missao', (req, res) => {
+    res.render('./adm/criarMissao.ejs')
 });
 
 app.get('/ficha/:id', async (req, res) => {
@@ -234,6 +277,47 @@ app.get('/ficha/:id', async (req, res) => {
     } catch (err) {
         console.error(err);
         res.status(500).send('Erro no servidor');
+    }
+});
+
+app.post('/mission-submit', upload.single('imagem'), async (req, res) => {
+    const { titulo, descricao, imagem, pontos, dinheiro } = req.body;
+    let imageUrl = null;
+    if (req.file) {
+        imageUrl = req.file.path;
+    }
+    try {
+        const newMission = new Mission({
+            titulo,
+            descricao,
+            imagem: imageUrl,
+            pontos,
+            dinheiro
+        });
+
+        await newMission.save();
+        console.log('Mensagem salva:', newMission);
+        res.status(201).json(newMission);
+    } catch (err) {
+        console.error('Erro ao salvar a missão:', err.message);
+        res.status(500).json({ error: 'Erro ao salvar a missão.' });
+    }
+});
+app.get('/mission-delete/:id', async (req, res) => {
+    const titulo = req.params.id;
+
+    try {
+        const missao = await Mission.findOneAndDelete({ titulo });
+
+        if (!missao) {
+            return res.status(404).json({ error: 'Missão não encontrada.' });
+        }
+
+        console.log('Missão deletada:', missao);
+        res.redirect('/loginAdm')
+    } catch (err) {
+        console.error('Erro ao deletar missão:', err.message);
+        res.status(500).json({ error: 'Erro ao deletar a missão.' });
     }
 });
 

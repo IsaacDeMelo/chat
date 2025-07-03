@@ -28,7 +28,7 @@
             border-radius: 50px;
             z-index: 1000;
             box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
-            border: 2px solid black;
+            border: 1px solid #1a73e8;
         }
 
         .nav-button {
@@ -72,7 +72,7 @@
             transform: translateX(-50%);
             overflow: hidden;
             margin: 0 auto;
-            border: 1px solid #333;
+            border: 1px solid #1a73e8;
             z-index: 999;
             display: none;
         }
@@ -139,7 +139,6 @@
             justify-content: left;
             align-items: center;
         }
-
         .map-container {
             width: 100%;
             height: 100vh;
@@ -150,8 +149,8 @@
             transform: translateX(-50%);
             cursor: grab;
             background: linear-gradient(145deg, #0a1a2e 0%, #1a3a5a 100%);
-            border: 4px solid rgb(44, 44, 44);
-            box-shadow: -1px 2px 0px 3px black;
+            border: 2px solid #1a73e8;
+            box-shadow: 0px 0px 0px 20px black;
             display: none;
             z-index: 900;
         }
@@ -167,7 +166,7 @@
 
         .navigation-ui {
             position: fixed;
-            top: 300px;
+            top: 310px;
             left: 50%;
             transform: translateX(-50%);
             background: rgba(30, 30, 30);
@@ -177,7 +176,7 @@
             gap: 10px;
             z-index: 1000;
             box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
-            border: 2px solid black;
+            border: 1px solid #1a73e8
         }
 
         .nav-button {
@@ -206,8 +205,8 @@
 <body>
     <div class="main">
         <div class="navbar">
-            <button id="toggle-card" class="nav-button">👤</button>
-            <button id="toggle-map" class="nav-button">🗺️</button>
+            <button id="toggle-card" class="nav-button"><svg style="display: flex; justify-content: center; align-items: center;" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg" fill="none"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <g fill="#ffffff"> <path d="M3.75 9a.75.75 0 000 1.5h1.5a.75.75 0 000-1.5h-1.5z"></path> <path fill-rule="evenodd" d="M0 4.25A2.25 2.25 0 012.25 2h11.5A2.25 2.25 0 0116 4.25v7.5A2.25 2.25 0 0113.75 14H2.25A2.25 2.25 0 010 11.75v-7.5zm14.5 0V5h-13v-.75a.75.75 0 01.75-.75h11.5a.75.75 0 01.75.75zm0 2.75h-13v4.75c0 .414.336.75.75.75h11.5a.75.75 0 00.75-.75V7z" clip-rule="evenodd"></path> </g> </g></svg></button>
+            <button id="toggle-map" class="nav-button"><svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="#ffffff"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <path d="M12 6H12.01M9 20L3 17V4L5 5M9 20L15 17M9 20V14M15 17L21 20V7L19 6M15 17V14M15 6.2C15 7.96731 13.5 9.4 12 11C10.5 9.4 9 7.96731 9 6.2C9 4.43269 10.3431 3 12 3C13.6569 3 15 4.43269 15 6.2Z" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path> </g></svg></button>
         </div>
         <div class="hunter-card" id="hunter-card">
             <input type="file" id="hunter-image-upload" accept="image/*" style="display: none;">

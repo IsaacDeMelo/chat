@@ -229,6 +229,12 @@ app.get('/home/:id', async (req, res) => {
     let user = await User.findOne({ password: userPassword });
     if (user) {
         let users = await User.find({});
+        users.forEach(element => {
+            if (!element.nen) {
+                element.nen = false
+                element.save();
+            }
+        })
         res.render('chat', { user: user, users: users });
     } else {
         res.redirect('/login')
@@ -256,11 +262,11 @@ app.get('/deletar-resposta/:id/:password', async (req, res) => {
         if (!response) {
             return res.status(404).send('Resposta não encontrada.');
         }
-        
+
         await Response.findByIdAndDelete(id);
 
         // Redireciona após deletar (ajuste o caminho conforme seu fluxo)
-        res.redirect(`/response/${response.missao}/${user.password}`); 
+        res.redirect(`/response/${response.missao}/${user.password}`);
     } catch (error) {
         console.error('Erro ao deletar resposta:', error);
         res.status(500).send('Erro ao tentar deletar a resposta.');
@@ -460,12 +466,100 @@ app.post('/responder-missao', async (req, res) => {
     res.redirect(`/open-world/${user.password}`);
 
 });
+app.get('/pontos/:password', async (req, res) => {
+    const password = req.params.password;
+    const user = await User.findOne({ password });
+    res.render('pontos', { user: user })
+});
+app.post('/pontos/:password', async (req, res) => {
+    const password = req.params.password;
+    const user = await User.findOne({ password });
+
+    if (!user || !user.data || !user.data.atributos) {
+        return res.status(400).send("Usuário inválido");
+    }
+
+    const body = req.body;
+    const atributos = ['forca', 'resistencia', 'velocidade', 'agilidade'];
+    let totalGasto = 0;
+
+    for (let attr of atributos) {
+        const incremento = parseInt(body[attr]) || 0;
+
+        if (incremento < 0) {
+            return res.status(400).send(`Valor negativo não permitido em ${attr}.`);
+        }
+
+        user.data.atributos[attr] += incremento;
+        totalGasto += incremento;
+    }
+
+    if (user.nen && body.nen) {
+        const nenIncremento = parseInt(body.nen) || 0;
+
+        if (nenIncremento < 0) {
+            return res.status(400).send("Valor negativo não permitido em Nen.");
+        }
+
+        user.data.atributos.nen += nenIncremento;
+        totalGasto += nenIncremento;
+    }
+
+    if (totalGasto > user.data.atributos.extra) {
+        return res.status(400).send("Você gastou mais pontos do que o disponível.");
+    }
+
+    user.data.atributos.extra -= totalGasto;
+
+    await user.save();
+    res.redirect('/');
+});
+
 app.get('/revisar-missao/:titulo/:usuario', async (req, res) => {
     const { titulo, usuario } = req.params;
     const response = await Response.findOne({ missao: titulo, usuario: usuario });
     const user = await User.findOne({ username: usuario });
     if (response) {
-        res.render('revisao', { user: user, response: response })
+        const atributosBase = user.data.atributos || {};
+        const atributosComBonus = {
+            forca: Number(atributosBase.forca) || 0,
+            resistencia: Number(atributosBase.resistencia) || 0,
+            velocidade: Number(atributosBase.velocidade) || 0,
+            agilidade: Number(atributosBase.agilidade) || 0,
+            nen: Number(atributosBase.nen) || 0
+        };
+
+
+        const familia = user.data.familia;
+
+        if (familia === "Zoldyck") {
+            atributosComBonus.forca *= 1.10;
+            atributosComBonus.velocidade *= 1.15;
+        } else if (familia === "Uzuki") {
+            atributosComBonus.forca *= 1.10;
+            atributosComBonus.velocidade *= 1.10;
+        } else if (familia === "Freecs") {
+            atributosComBonus.forca *= 1.25;
+            atributosComBonus.resistencia *= 1.25;
+        } else if (familia === "Netero") {
+            atributosComBonus.forca *= 1.20;
+            atributosComBonus.resistencia *= 1.20;
+        } else if (familia === "Ryusegai") {
+            atributosComBonus.forca *= 1.20;
+            atributosComBonus.velocidade *= 1.15;
+            atributosComBonus.resistencia *= 1.10;
+        }
+
+        // Arredonda os valores com bônus, se quiser:
+        for (let key in atributosComBonus) {
+            atributosComBonus[key] = atributosComBonus[key].toFixed(1);
+        }
+
+        res.render('revisao', {
+            user,
+            response,
+            atributosBonus: atributosComBonus
+        });
     } else {
         console.log(titulo)
         console.log(usuario)

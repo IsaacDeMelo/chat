@@ -36,6 +36,7 @@ const UserSchema = new Schema({
     girosH: { type: Number, required: true, default: 5},
     girosR: { type: Number, required: true, default: 5},
     adm: { type: Boolean, required: true, default: false},
+    nen: { type: Boolean, required: true, default: false},
     data: {
         type: dataSchema, 
         required: false,  

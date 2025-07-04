@@ -138,14 +138,14 @@
                     <p><strong>Família:</strong> <%= user.data?.familia %></p>
                 </div>
 
-                <h3>Atributos</h3>
-                <ul>
-                    <li><strong>Força:</strong> <%= user.data?.atributos?.forca %></li>
-                    <li><strong>Resistência:</strong> <%= user.data?.atributos?.resistencia %></li>
-                    <li><strong>Velocidade:</strong> <%= user.data?.atributos?.velocidade %></li>
-                    <li><strong>Agilidade:</strong> <%= user.data?.atributos?.agilidade %></li>
-                    <li><strong>Nen:</strong> <%= user.data?.atributos?.nen %></li>
-                </ul>
+                <h3>Atributos com bônus de família (<%= user.data.familia %>)</h3>
+<ul>
+    <li><strong>Força:</strong> <%= atributosBonus.forca %></li>
+    <li><strong>Resistência:</strong> <%= atributosBonus.resistencia %></li>
+    <li><strong>Velocidade:</strong> <%= atributosBonus.velocidade %></li>
+    <li><strong>Agilidade:</strong> <%= atributosBonus.agilidade %></li>
+    <li><strong>Nen:</strong> <%= atributosBonus.nen %></li>
+</ul>
 
                 <h3>Outros dados</h3>
                 <div class="info-group">

@@ -481,8 +481,8 @@
                 };
 
                 const thresholds = [
-                    { min: 0, max: 20, value: 20 },
-                    { min: 21, max: 100, value: 100 },
+                    { min: 0, max: 50, value: 50 },
+                    { min: 100, max: 150, value: 150 },
                     { min: 101, max: 200, value: 200 },
                     { min: 201, max: 500, value: 500 },
                     { min: 501, max: 1000, value: 1000 },
@@ -906,11 +906,11 @@
     <div id="chatHeader"
         style="position: fixed; top: 0; left: 0; right: 0; height: 72px; background-color: #1e1e1e; display: flex; align-items: center; padding: 0 16px; border-bottom: 1px solid #333; z-index: 10;">
         <div style="display: flex; align-items: center; gap: 12px; width: 100%;">
-            <img id="chatProfile" src="https://i.pinimg.com/736x/ee/51/73/ee5173dd81b2abc23de6df5a5b671548.jpg"
+            <img id="chatProfile" src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTnN7QKq74xvyRAIc_w2a5S1a0sg8KfTGs-ng&s"
                 style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover;">
             <div style="flex: 1;">
-                <h3 style="margin: 0; color: #fff; font-size: 16px;">Grupo RPG</h3>
-                <p style="margin: 0; color: #9e9e9e; font-size: 12px;">Lyonel Pesyac.</p>
+                <h3 style="margin: 0; color: #fff; font-size: 16px;">Grupo Last Calamity</h3>
+                <p style="margin: 0; color: #9e9e9e; font-size: 12px;">Chat Casual</p>
             </div>
             <button id="sidebarToggle"
                 style="background: none; border: none; color: #fff; font-size: 20px; cursor: pointer;">☰</button>
@@ -1026,11 +1026,13 @@
 
 
     </div>
-    <% if (user.data && user.adm == true) {%>
+    <% if (user.adm){%>
     <button type="button" onclick="goToAdmin()"
         style="position: fixed; right: 200px; top: 90px; background: #2d2d2d; border: none; padding: 8px; color: #9e9e9e; border-radius: 50%; width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 2px 5px rgba(0,0,0,0.2); z-index: 25;">
         <svg viewBox="0 0 18 18" xmlns="http://www.w3.org/2000/svg" fill="#9e9e9e"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <rect x="0" fill="none" width="20" height="20"></rect> <g> <path d="M9 0C4.03 0 0 4.03 0 9s4.03 9 9 9 9-4.03 9-9-4.03-9-9-9zM1.11 9.68h2.51c.04.91.167 1.814.38 2.7H1.84c-.403-.85-.65-1.764-.73-2.7zm8.57-5.4V1.19c.964.366 1.756 1.08 2.22 2 .205.347.386.708.54 1.08l-2.76.01zm3.22 1.35c.232.883.37 1.788.41 2.7H9.68v-2.7h3.22zM8.32 1.19v3.09H5.56c.154-.372.335-.733.54-1.08.462-.924 1.255-1.64 2.22-2.01zm0 4.44v2.7H4.7c.04-.912.178-1.817.41-2.7h3.21zm-4.7 2.69H1.11c.08-.936.327-1.85.73-2.7H4c-.213.886-.34 1.79-.38 2.7zM4.7 9.68h3.62v2.7H5.11c-.232-.883-.37-1.788-.41-2.7zm3.63 4v3.09c-.964-.366-1.756-1.08-2.22-2-.205-.347-.386-.708-.54-1.08l2.76-.01zm1.35 3.09v-3.04h2.76c-.154.372-.335.733-.54 1.08-.464.92-1.256 1.634-2.22 2v-.04zm0-4.44v-2.7h3.62c-.04.912-.178 1.817-.41 2.7H9.68zm4.71-2.7h2.51c-.08.936-.327 1.85-.73 2.7H14c.21-.87.337-1.757.38-2.65l.01-.05zm0-1.35c-.046-.894-.176-1.78-.39-2.65h2.16c.403.85.65 1.764.73 2.7l-2.5-.05zm1-4H13.6c-.324-.91-.793-1.76-1.39-2.52 1.244.56 2.325 1.426 3.14 2.52h.04zm-9.6-2.52c-.597.76-1.066 1.61-1.39 2.52H2.65c.815-1.094 1.896-1.96 3.14-2.52zm-3.15 12H4.4c.324.91.793 1.76 1.39 2.52-1.248-.567-2.33-1.445-3.14-2.55l-.01.03zm9.56 2.52c.597-.76 1.066-1.61 1.39-2.52h1.76c-.82 1.08-1.9 1.933-3.14 2.48l-.01.04z"></path> </g> </g></svg>
     </button>
+    <%}%>
+    <% if (user.data) {%>
     <button type="button" onclick="goToGame()"
         style="position: fixed; right: 140px; top: 90px; background: #2d2d2d; border: none; padding: 8px; color: #9e9e9e; border-radius: 50%; width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 2px 5px rgba(0,0,0,0.2); z-index: 25;">
         <svg viewBox="0 0 24 24" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" fill="#000000"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <title>alipay_line</title> <g id="页面-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd"> <g id="Brand" transform="translate(-48.000000, -0.000000)"> <g id="alipay_line" transform="translate(48.000000, 0.000000)"> <path d="M24,0 L24,24 L0,24 L0,0 L24,0 Z M12.5934901,23.257841 L12.5819402,23.2595131 L12.5108777,23.2950439 L12.4918791,23.2987469 L12.4918791,23.2987469 L12.4767152,23.2950439 L12.4056548,23.2595131 C12.3958229,23.2563662 12.3870493,23.2590235 12.3821421,23.2649074 L12.3780323,23.275831 L12.360941,23.7031097 L12.3658947,23.7234994 L12.3769048,23.7357139 L12.4804777,23.8096931 L12.4953491,23.8136134 L12.4953491,23.8136134 L12.5071152,23.8096931 L12.6106902,23.7357139 L12.6232938,23.7196733 L12.6232938,23.7196733 L12.6266527,23.7031097 L12.609561,23.275831 C12.6075724,23.2657013 12.6010112,23.2592993 12.5934901,23.257841 L12.5934901,23.257841 Z M12.8583906,23.1452862 L12.8445485,23.1473072 L12.6598443,23.2396597 L12.6498822,23.2499052 L12.6498822,23.2499052 L12.6471943,23.2611114 L12.6650943,23.6906389 L12.6699349,23.7034178 L12.6699349,23.7034178 L12.678386,23.7104931 L12.8793402,23.8032389 C12.8914285,23.8068999 12.9022333,23.8029875 12.9078286,23.7952264 L12.9118235,23.7811639 L12.8776777,23.1665331 C12.8752882,23.1545897 12.8674102,23.1470016 12.8583906,23.1452862 L12.8583906,23.1452862 Z M12.1430473,23.1473072 C12.1332178,23.1423925 12.1221763,23.1452606 12.1156365,23.1525954 L12.1099173,23.1665331 L12.0757714,23.7811639 C12.0751323,23.7926639 12.0828099,23.8018602 12.0926481,23.8045676 L12.108256,23.8032389 L12.3092106,23.7104931 L12.3186497,23.7024347 L12.3186497,23.7024347 L12.3225043,23.6906389 L12.340401,23.2611114 L12.337245,23.2485176 L12.337245,23.2485176 L12.3277531,23.2396597 L12.1430473,23.1473072 Z" id="MingCute" fill-rule="nonzero"> </path> <path d="M20.2253,17.6889 C18.4201,20.2939 15.4093,22 12,22 C6.47715,22 2,17.5228 2,12 C2,6.47715 6.47715,2 12,2 C17.5228,2 22,6.47715 22,12 C22,13.9924 21.4173,15.8487 20.413,17.4079 C20.4122,17.4098 20.4113,17.4118 20.4104,17.4138 C20.363,17.5181 20.2999,17.6103 20.2253,17.6889 Z M4,12 C4,7.58172 7.58172,4 12,4 C16.4183,4 20,7.58172 20,12 C20,13.3397 19.6707,14.6025 19.0886,15.7118 C18.2611,15.3304 17.4964,14.9706 16.7884,14.6375 C16.041,14.2858 15.3568,13.9639 14.7282,13.6774 C15.1373,12.8756 15.5415,11.9371 15.9398,10.8417 C16.0513,10.5352 16.0062,10.1935 15.8191,9.9263 C15.6319,9.65911 15.3262,9.5 15,9.5 L13,9.5 L13,9 L16,9 C16.5523,9 17,8.55228 17,8 C17,7.44772 16.5523,7 16,7 L13,7 L13,6 C13,5.44772 12.5523,5 12,5 C11.4477,5 11,5.44772 11,6 L11,7 L8,7 C7.44772,7 7,7.44772 7,8 C7,8.55228 7.44772,9 8,9 L11,9 L11,9.5 L9,9.5 C8.44771,9.5 8,9.94772 8,10.5 C8,11.0523 8.44771,11.5 9,11.5 L13.5345,11.5 C13.3152,12.0178 13.0989,12.477 12.8869,12.8842 C11.4939,12.3336 10.2676,12 9,12 C7.47994,12 6,13.316 6,15 C6,16.8201 7.63195,18 9.5,18 C10.5201,18 11.648,17.6412 12.7696,16.5196 C13.0809,16.2083 13.3905,15.8397 13.6978,15.4057 C14.3552,15.7026 15.0716,16.0399 15.8763,16.4188 C16.5009,16.7129 17.1788,17.0321 17.9236,17.3769 C16.4601,18.9883 14.3482,20 12,20 C7.58172,20 4,16.4183 4,12 Z M9,14 C9.82654,14 10.6871,14.1943 11.7969,14.608 C11.6454,14.798 11.498,14.9628 11.3554,15.1054 C10.602,15.8588 9.97992,16 9.5,16 C8.36805,16 8,15.3799 8,15 C8,14.484 8.52006,14 9,14 Z" id="形状" fill="#9e9e9e"> </path> </g> </g> </g> </g></svg>
@@ -1157,6 +1159,14 @@
                         </h3>
                         <p style="font-size: 15px">Atributos</p>
                         <svg viewBox="0 0 600 600" id="radarSvg"></svg>
+                        <% if (user.data.atributos.extra > 0) {%>
+                            <p style="font-size: 15px">Há <%=user.data.atributos.extra%> pontos para investir! </p>
+                    </p>
+                            <button
+                                    style="background: #1a73e8; border: none; padding: 10px 20px; border-radius: 20px; margin-top: 10px; cursor: pointer; width: 70%; font-weight: bold; transition: background 0.2s; margin-bottom: 20px;"><a
+                                        href="/pontos/<%=user.password%>"
+                                        style="text-decoration: none; color: rgba(255, 255, 255, 0.39);">Investir</a></button>    
+                        <% } %>
                     </div>
                     <% } else { %>
                         <div class="radar-chart">

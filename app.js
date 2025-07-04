@@ -428,7 +428,16 @@ app.post('/enviar-ficha/:id', async (req, res) => {
     }
 });
 app.post('/responder-missao', async (req, res) => {
-    const { usuario, texto } = req.body;
+    const { titulo, usuario, texto } = req.body;
+    const user = await User.findOne({ password: usuario })
+    const resposta = new Response({
+        missao: titulo,
+        usuario: user.username,
+        numeroUsuario: user.number,
+        texto: texto,
+    })
+    res.redirect(`/open-world/${user.password}`);
+    console.log(req.body);
 });
 app.get('/response/:id/:password', async (req, res) => {
     const titulo = req.params.id;

@@ -416,7 +416,8 @@ app.post('/enviar-ficha/:id', async (req, res) => {
             tipoRatsu: d.nenType,
             raridadeNen: d.hatsu,
             itens: {},
-            dinheiro: Number(d.money?.replace(/\D/g, '') || 10000)
+            dinheiro: Number(String(d.money)?.replace(/\D/g, '') || 10000)
+
         };
 
         await user.save();

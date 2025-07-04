@@ -212,7 +212,7 @@ app.post('/api/loginAdm', async (req, res) => {
         if (user) {
             CurrentUser = user;
             // Número válido, retorna sucesso
-            if (user.adm == true){
+            if (user.adm == true) {
                 res.redirect(`/adm/${user.password}`)
             }
         } else {
@@ -238,12 +238,32 @@ app.get('/adm/:id', async (req, res) => {
     let userPassword = req.params.id;
     let user = await User.findOne({ password: userPassword });
     if (user) {
-        let users = await User.find({});
+        let users = await User.find();
         let missions = await Mission.find();
-        let responses = await Response.find();
+        const responses = await Response.find({ revisado: false });
         res.render('adm', { user: user, users: users, responses: responses, missions: missions });
     } else {
         res.redirect('/login')
+    }
+});
+app.get('/deletar-resposta/:id/:password', async (req, res) => {
+    try {
+        const { id, password } = req.params;
+
+        // Verifica se a resposta existe antes de deletar (opcional)
+        const response = await Response.findById(id);
+        const user = await User.findOne({ password })
+        if (!response) {
+            return res.status(404).send('Resposta não encontrada.');
+        }
+        
+        await Response.findByIdAndDelete(id);
+
+        // Redireciona após deletar (ajuste o caminho conforme seu fluxo)
+        res.redirect(`/response/${response.missao}/${user.password}`); 
+    } catch (error) {
+        console.error('Erro ao deletar resposta:', error);
+        res.status(500).send('Erro ao tentar deletar a resposta.');
     }
 });
 app.get('/criar-missao', (req, res) => {
@@ -363,8 +383,6 @@ app.post('/api/messages', upload.single('image'), async (req, res) => {
         res.status(500).json({ error: 'Erro ao salvar mensagem' });
     }
 });
-
-
 app.get('/api/messages', async (req, res) => {
     try {
         const messages = await Message.find();
@@ -374,7 +392,6 @@ app.get('/api/messages', async (req, res) => {
         res.status(500).json({ error: 'Erro ao buscar mensagens' });
     }
 });
-
 app.post('/enviar-ficha/:id', async (req, res) => {
     let userPassword = req.params.id;
     let user = await User.findOne({ password: userPassword });
@@ -429,16 +446,79 @@ app.post('/enviar-ficha/:id', async (req, res) => {
     }
 });
 app.post('/responder-missao', async (req, res) => {
-    const { titulo, usuario, texto } = req.body;
-    const user = await User.findOne({ password: usuario })
+    const { titulo, password, texto } = req.body;
+    console.log(req.body);
+    const user = await User.findOne({ password: password })
+    console.log(user);
     const resposta = new Response({
         missao: titulo,
         usuario: user.username,
         numeroUsuario: user.number,
         texto: texto,
     })
+    resposta.save();
     res.redirect(`/open-world/${user.password}`);
-    console.log(req.body);
+
+});
+app.get('/revisar-missao/:titulo/:usuario', async (req, res) => {
+    const { titulo, usuario } = req.params;
+    const response = await Response.findOne({ missao: titulo, usuario: usuario });
+    const user = await User.findOne({ username: usuario });
+    if (response) {
+        res.render('revisao', { user: user, response: response })
+    } else {
+        console.log(titulo)
+        console.log(usuario)
+        console.log(user)
+        console.log(response)
+    }
+});
+app.post('/aprovar-missao/:id', async (req, res) => {
+    try {
+        const { id } = req.params;
+
+        // 1. Buscar a resposta
+        const response = await Response.findById(id);
+        if (!response) return res.status(404).send("Resposta não encontrada.");
+
+        // 2. Buscar a missão correspondente
+        const mission = await Mission.findOne({ titulo: response.missao });
+        if (!mission) return res.status(404).send("Missão associada não encontrada.");
+
+        // 3. Buscar o usuário
+        const user = await User.findOne({ username: response.usuario });
+        if (!user || !user.data) return res.status(404).send("Usuário não encontrado.");
+
+        // 4. Atribuir recompensas
+        const pontos = parseInt(mission.pontos, 10) || 0;
+        const dinheiro = parseInt(mission.dinheiro, 10) || 0;
+
+        if (user.data.atributos) {
+            user.data.atributos.extra = (user.data.atributos.extra || 0) + pontos;
+        }
+
+        user.data.dinheiro += dinheiro;
+
+        // 5. Marcar a resposta como revisada e aprovada
+        response.revisado = true;
+        response.aprovado = true;
+
+        await Promise.all([
+            response.save(),
+            user.save()
+        ]);
+
+        res.redirect('/loginAdm'); // ou para a lista de revisões
+    } catch (err) {
+        console.error("Erro ao aprovar missão:", err);
+        res.status(500).send("Erro interno ao aprovar missão.");
+    }
+});
+
+app.post('/reprovar-missao/:id', async (req, res) => {
+    const { id } = req.params;
+    await Response.findByIdAndUpdate(id, { revisado: true, aprovado: false });
+    res.redirect('/loginAdm'); // ou a página que desejar
 });
 app.get('/response/:id/:password', async (req, res) => {
     const titulo = req.params.id;

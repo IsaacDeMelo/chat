@@ -9,6 +9,7 @@ const atributosSchema = new Schema({
   velocidade: Number,
   agilidade: Number,
   nen: Number,
+  extra: Number,
 
 }, { _id: false });
 

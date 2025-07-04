@@ -281,10 +281,10 @@ document.addEventListener('DOMContentLoaded', () => {
     // ==== FAMILY ====
     const spinFamilyBtn = document.getElementById('spinFamily');
     const families = [
-        ...Array(40).fill(['Exilado']).flat(),
-        ...Array(30).fill(['Ferrier', 'Eralith']).flat(),
-        ...Array(20).fill(['Nostrade', 'Kakin', 'Miyazawa']).flat(),
-        ...Array(10).fill(['Zoldyck', 'Kurta', 'Uzuki']).flat(),
+        ...Array(400).fill(['Exilado']).flat(),
+        ...Array(300).fill(['Ferrier', 'Eralith']).flat(),
+        ...Array(200).fill(['Nostrade', 'Kakin', 'Miyazawa']).flat(),
+        ...Array(50).fill(['Uzuki']).flat(),
         ...Array(1).fill(['Freecs', 'Netero', 'Ryusegai']).flat()
     ];
     const familyRarityMap = {
@@ -337,10 +337,9 @@ document.addEventListener('DOMContentLoaded', () => {
     // ==== HATSU final ====
     const spinHatsuBtn = document.getElementById('spinHatsu');
     const hatsuRarities = [
-        ...Array(70).fill(['Normal', '1 em 500k', '1 em 1M', '1 em 10M']).flat(),
-        ...Array(20).fill(['1 em 100M', '1 em 250M', '1 em 500M']).flat(),
-        ...Array(10).fill(['1 em 750M']).flat(),
-        ...Array(10).fill(['1 em 1B']).flat()
+        ...Array(700).fill(['Normal', '1 em 500k', '1 em 1M', '1 em 10M']).flat(),
+        ...Array(250).fill(['1 em 100M', '1 em 250M', '1 em 500M']).flat(),
+        ...Array(50).fill(['1 em 750M']).flat(),
     ];
     const hatsuRarityMap = {
         'normal':'common-family',

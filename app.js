@@ -34,7 +34,7 @@ const storage = new CloudinaryStorage({
 
 const upload = multer({ storage });
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 3200;
 const server = http.createServer(app); // Cria o servidor HTTP
 const io = new Server(server); // Adiciona o WebSocket ao servidor
 
@@ -71,7 +71,6 @@ app.use(express.urlencoded({ extended: true })); // Para processar dados de form
 // Middleware para interpretar JSON
 app.use(express.json());
 
-
 const connectDB = async () => {
     try {
         await mongoose.connect(process.env.MONGO_URI, {
@@ -91,7 +90,10 @@ app.get('/', async (req, res) => {
 app.get('/open-world/:id', async (req, res) => {
     let userPassword = req.params.id;
     let user = await User.findOne({ password: userPassword });
-    res.render('open-world', { user: user })
+    let missions = await Mission.find();
+    let responses = await Response.find();
+    console.log(responses)
+    res.render('open-world', { user: user, missions: missions, responses: responses })
 })
 app.post('/spin/:id', async (req, res) => {
     const type = req.body.type;
@@ -247,7 +249,6 @@ app.get('/adm/:id', async (req, res) => {
 app.get('/criar-missao', (req, res) => {
     res.render('./adm/criarMissao.ejs')
 });
-
 app.get('/ficha/:id', async (req, res) => {
     try {
         let userPassword = req.params.id;
@@ -263,7 +264,6 @@ app.get('/ficha/:id', async (req, res) => {
         res.status(500).send('Erro no servidor');
     }
 });
-
 app.post('/mission-submit', upload.single('imagem'), async (req, res) => {
     const { titulo, descricao, imagem, pontos, dinheiro } = req.body;
     let imageUrl = null;
@@ -301,7 +301,6 @@ app.get('/mission-delete/:id', async (req, res) => {
         res.status(500).json({ error: 'Erro ao deletar a missão.' });
     }
 });
-
 app.post('/api/messages', upload.single('image'), async (req, res) => {
     const { usuario, texto } = req.body;
     const user = await User.findOne({ username: usuario });
@@ -428,7 +427,18 @@ app.post('/enviar-ficha/:id', async (req, res) => {
         res.status(500).json({ success: false, error: 'Erro ao salvar no banco.' });
     }
 });
-
+app.post('/responder-missao', async (req, res) => {
+    const { usuario, texto } = req.body;
+});
+app.get('/response/:id/:password', async (req, res) => {
+    const titulo = req.params.id;
+    const password = req.params.password;
+    console.log(titulo);
+    console.log(password);
+    const mission = await Mission.findOne({ titulo });
+    const user = await User.findOne({ password });
+    res.render('response', { mission: mission, user: user });
+});
 // Inicia o servidor e conecta ao MongoDB
 server.listen(PORT, () => {
     console.log(`Servidor rodando na porta ${PORT}`);

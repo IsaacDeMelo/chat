@@ -20,6 +20,10 @@ const messageSchema = new mongoose.Schema(
       type: String,
       default: null
     },
+    grupo: {
+      type: String,
+      default: "main",
+    },
     created: {
       type: String, // URL da foto
       default: null, // Permite mensagens sem foto

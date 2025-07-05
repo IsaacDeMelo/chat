@@ -230,6 +230,11 @@ app.get('/home/:id', async (req, res) => {
     if (user) {
         let users = await User.find({});
         users.forEach(element => {
+            if (!element.grupos){
+                element.grupos = ['main'];
+            } else {
+                element.grupos = ['main']
+            }
             if (!element.nen) {
                 element.nen = false
                 element.save();
@@ -328,7 +333,7 @@ app.get('/mission-delete/:id', async (req, res) => {
     }
 });
 app.post('/api/messages', upload.single('image'), async (req, res) => {
-    const { usuario, texto } = req.body;
+    const { usuario, texto, grupo } = req.body;
     const user = await User.findOne({ username: usuario });
     const foto = user?.perfil;
     const created = moment().tz('America/Sao_Paulo').format('hh:mm A');
@@ -378,6 +383,7 @@ app.post('/api/messages', upload.single('image'), async (req, res) => {
             texto,
             foto,
             created,
+            grupo,
             imageUrl
         });
 

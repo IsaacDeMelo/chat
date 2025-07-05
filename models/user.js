@@ -41,6 +41,7 @@ const UserSchema = new Schema({
         type: dataSchema, 
         required: false,  
     },
+    grupos: { type: Array, default: ['main']},
     lastMessageTime: {
         type: Date, // Armazena o tempo da última mensagem
         default: null

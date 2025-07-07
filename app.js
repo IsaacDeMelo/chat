@@ -523,9 +523,12 @@ app.post('/pontos/:password', async (req, res) => {
 
 app.get('/revisar-missao/:titulo/:usuario', async (req, res) => {
     const { titulo, usuario } = req.params;
+    
     const response = await Response.findOne({ missao: titulo, usuario: usuario });
     const user = await User.findOne({ username: usuario });
     if (response) {
+        console.log(user)
+        console.log(response)
         const atributosBase = user.data.atributos || {};
         const atributosComBonus = {
             forca: Number(atributosBase.forca) || 0,
@@ -544,6 +547,9 @@ app.get('/revisar-missao/:titulo/:usuario', async (req, res) => {
         } else if (familia === "Uzuki") {
             atributosComBonus.forca *= 1.10;
             atributosComBonus.velocidade *= 1.10;
+        } else if (familia === "Kurta") {
+            atributosComBonus.agilidade *= 1.10;
+            atributosComBonus.resistencia *= 1.10;
         } else if (familia === "Freecs") {
             atributosComBonus.forca *= 1.25;
             atributosComBonus.resistencia *= 1.25;
